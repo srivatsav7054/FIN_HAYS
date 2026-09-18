@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Sprout, User, Volume2, VolumeX, Copy, Check } from "lucide-react";
+import { ChartNoAxesCombined, User, Volume2, VolumeX, Copy, Check } from "lucide-react";
 import { SourcesList } from "./SourcesList";
 import { FlaggedCard } from "./FlaggedCard";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -76,7 +76,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
       {/* Left Avatar for Agent */}
       {!isUser && (
         <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-800 text-white shadow-soft">
-          <Sprout className="h-5 w-5" />
+          <ChartNoAxesCombined className="h-5 w-5" />
         </div>
       )}
 

@@ -3,7 +3,7 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useAuthSession } from "@/hooks/useAuth";
 import { type UiLanguage } from "@/types";
-import { Sprout, MessageSquare, User, LayoutDashboard, Menu, X, PhoneCall, Globe, LogOut } from "lucide-react";
+import { ChartNoAxesCombined, MessageSquare, User, LayoutDashboard, Menu, X, PhoneCall, Globe, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
 
 const languages: { code: UiLanguage; label: string; native: string }[] = [
@@ -19,7 +19,7 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
-    { to: "/", label: t?.navHome ?? "Home", icon: Sprout },
+    { to: "/", label: t?.navHome ?? "Home", icon: ChartNoAxesCombined },
     { to: "/demo", label: t?.navDemo ?? "AI Demo", icon: MessageSquare },
     ...(session?.role === "admin"
       ? [{ to: "/dashboard", label: "Operations", icon: LayoutDashboard }]
@@ -37,7 +37,7 @@ export function Navbar() {
         {/* Brand Logo & Tagline */}
         <Link to="/" className="flex items-center gap-3 transition-opacity hover:opacity-90">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--color-primary)] text-white shadow-sm">
-            <Sprout className="h-6 w-6 stroke-[2.2]" />
+            <ChartNoAxesCombined className="h-6 w-6 stroke-[2.2]" />
           </div>
           <div>
             <div className="flex items-center gap-2">

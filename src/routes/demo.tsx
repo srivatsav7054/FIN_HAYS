@@ -7,7 +7,7 @@ import { ChatStatusBadge, type AiStatusState } from "@/components/chat/ChatStatu
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { type LanguageCode } from "@/types";
-import { Sprout, Info, ShieldCheck, Sparkles } from "lucide-react";
+import { ChartNoAxesCombined, Info, ShieldCheck, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 
 export const Route = createFileRoute("/demo")({
@@ -79,7 +79,7 @@ export function DemoPage() {
       const res = await postAgentQuery({
         session_id: sessionId,
         text,
-        language: lang === "auto" ? "en" : lang,
+        language: lang,
       });
 
       setStatus(res.flagged ? "FLAGGED" : "RESPONDING");
@@ -137,7 +137,7 @@ export function DemoPage() {
                       style={{ transform: "rotateX(25deg) rotateY(65deg)" }}
                     />
                     <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-600 to-emerald-800 text-white shadow-soft">
-                      <Sprout className="h-4 w-4" />
+                      <ChartNoAxesCombined className="h-4 w-4" />
                     </div>
                   </div>
                   <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-[var(--color-foreground)]">
@@ -205,7 +205,7 @@ export function DemoPage() {
                   className="flex items-center gap-3"
                 >
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--color-primary)] text-white shadow-xs">
-                    <Sprout className="h-5 w-5" />
+                    <ChartNoAxesCombined className="h-5 w-5" />
                   </div>
                   <div className="rounded-lg rounded-tl-none border border-[var(--color-border)] bg-white px-4 py-3 shadow-soft">
                     <div className="flex items-center gap-2">

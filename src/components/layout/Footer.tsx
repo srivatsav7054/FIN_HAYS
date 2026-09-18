@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useLanguage } from "@/hooks/useLanguage";
-import { ShieldCheck, Lock, Sprout, Heart } from "lucide-react";
+import { ShieldCheck, Lock, ChartNoAxesCombined, Heart } from "lucide-react";
 
 export function Footer() {
   const { t } = useLanguage();
@@ -13,7 +13,7 @@ export function Footer() {
           <div>
             <div className="flex items-center gap-2">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--color-primary)] text-white">
-                <Sprout className="h-5 w-5" />
+                <ChartNoAxesCombined className="h-5 w-5" />
               </div>
               <span className="font-display text-xl font-bold text-[var(--color-foreground)]">
                 Sahaara

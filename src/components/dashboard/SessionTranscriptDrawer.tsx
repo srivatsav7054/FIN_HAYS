@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getSessionHistory } from "@/api/sessions";
 import { mockTurnSources } from "@/mocks/data";
 import { type SessionHistory } from "@/types";
-import { X, ShieldAlert, BookOpen, Clock, User, Sprout, AlertTriangle } from "lucide-react";
+import { X, ShieldAlert, BookOpen, Clock, User, ChartNoAxesCombined, AlertTriangle } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/hooks/useLanguage";
 
@@ -137,7 +137,7 @@ export function SessionTranscriptDrawer({
                       </span>
                     ) : (
                       <span className="flex items-center gap-1.5 font-bold text-[var(--color-primary)]">
-                        <Sprout className="h-3.5 w-3.5" />
+                        <ChartNoAxesCombined className="h-3.5 w-3.5" />
                         <span>{t.sahaaraVoiceAI}</span>
                       </span>
                     )}

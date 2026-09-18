@@ -32,11 +32,6 @@ const samplePromptsByLang: Record<LanguageCode, { text: string; label: string; i
     { text: "SHG రుణం గురించి మరియు వడ్డీ గురించి చెప్పండి.", label: "SHG సమాచారం" },
     { text: "నా డబ్బును రెండు నెలల్లో రెట్టింపు చేసే పథకం ఉందా?", label: "ఫ్లాగ్ చేయబడిన డెమో (రిస్క్)", isFlaggedDemo: true },
   ],
-  auto: [
-    { text: "What is an emergency fund and how should I start one?", label: "Emergency Fund" },
-    { text: "SHG ऋण के बारे में जानकारी दें।", label: "SHG जानकारी" },
-    { text: "Is there a guaranteed 100% return investment scheme?", label: "Test Flagged Response", isFlaggedDemo: true },
-  ],
 };
 
 export function ChatInput({

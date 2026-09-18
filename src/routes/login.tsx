@@ -1,7 +1,7 @@
 import { FormEvent, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { ArrowRight, LockKeyhole, ShieldCheck, Sprout, UserRound, UsersRound } from "lucide-react";
+import { ArrowRight, LockKeyhole, ShieldCheck, ChartNoAxesCombined, UserRound, UsersRound } from "lucide-react";
 import { useAuthSession, type UserRole } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 
@@ -42,7 +42,7 @@ export function LoginPage() {
       <header className="relative z-10 mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-6 sm:px-8">
         <Link to="/" className="flex items-center gap-3">
           <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--color-primary)] text-white shadow-glow">
-            <Sprout className="h-6 w-6" />
+            <ChartNoAxesCombined className="h-6 w-6" />
           </span>
           <span className="font-display text-2xl font-bold text-[var(--color-foreground)]">Sahaara</span>
         </Link>

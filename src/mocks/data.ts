@@ -90,20 +90,6 @@ const agentReplies: Record<string, AgentQueryResponse[]> = {
       flagged: true,
     },
   ],
-  mr: [
-    {
-      response_text:
-        "आपत्कालीन निधी म्हणजे अनपेक्षित खर्चांसाठी बाजूला ठेवलेले पैसे. दिलेल्या माहितीच्या आधारे, दर आठवड्याला ₹100 जरी बाजूला ठेवणे हा एक संभाव्य मार्ग असू शकतो.",
-      sources: ["NCFE बचत मार्गदर्शक", "आर्थिक शिक्षण साहित्य"],
-      flagged: false,
-    },
-    {
-      response_text:
-        "निश्चित परतावा देण्याचे आश्वासन देणाऱ्या योजनेची मी शिफारस करू शकत नाही. गुंतवणुकीवरील परतावा कधीही निश्चित नसतो. निर्णयापूर्वी आपल्या बँक शाखेशी बोला.",
-      sources: ["SEBI गुंतवणूकदार जागरूकता", "RBI आर्थिक साक्षरता"],
-      flagged: true,
-    },
-  ],
 };
 
 const RISKY = /guarantee|double|return|scheme|chit|loan app|invest|रिटर्न|गारंटी|దుగ్గున|రాబడి|परतावा|हमी/i;
@@ -111,7 +97,7 @@ const counters: Record<string, number> = {};
 
 export async function mockPostAgentQuery(body: AgentQueryRequest): Promise<AgentQueryResponse> {
   await wait(1400 + Math.random() * 600);
-  const lang = body.language === "auto" ? "en" : body.language;
+  const lang = body.language;
   const pool = agentReplies[lang] ?? agentReplies.en;
   if (RISKY.test(body.text)) return pool.find((r) => r.flagged) ?? pool[pool.length - 1];
   const safe = pool.filter((r) => !r.flagged);
@@ -153,39 +139,39 @@ const sessions: SessionHistory[] = [
     session_id: "s-2401",
     turns: [
       { role: "user", text: "నేను ప్రతి నెల కొంత డబ్బు ఎలా ఆదా చేయగలను?", timestamp: "2026-09-18T09:12:04Z", flagged: false },
-      { role: "agent", text: "ఇచ్చిన సమాచారం ఆధారంగా, ప్రతి వారం చిన్న మొత్తాన్ని పక్కన పెట్టడం ఒక సాధ్యమైన మార్గం. మీ SHG పొదుపు పథకం గురించి అడగండి.", timestamp: "2026-09-18T09:12:09Z", flagged: false },
+      { role: "assistant", text: "ఇచ్చిన సమాచారం ఆధారంగా, ప్రతి వారం చిన్న మొత్తాన్ని పక్కన పెట్టడం ఒక సాధ్యమైన మార్గం. మీ SHG పొదుపు పథకం గురించి అడగండి.", timestamp: "2026-09-18T09:12:09Z", flagged: false },
       { role: "user", text: "నా డబ్బును రెండు నెలల్లో రెట్టింపు చేసే పథకం ఉందా?", timestamp: "2026-09-18T09:13:20Z", flagged: false },
-      { role: "agent", text: "నిర్ణీత రాబడిని హామీ ఇచ్చే పథకాన్ని నేను సిఫార్సు చేయలేను. దయచేసి మీ బ్యాంక్ శాఖతో మాట్లాడండి.", timestamp: "2026-09-18T09:13:26Z", flagged: true },
+      { role: "assistant", text: "నిర్ణీత రాబడిని హామీ ఇచ్చే పథకాన్ని నేను సిఫార్సు చేయలేను. దయచేసి మీ బ్యాంక్ శాఖతో మాట్లాడండి.", timestamp: "2026-09-18T09:13:26Z", flagged: true },
     ],
   },
   {
     session_id: "s-2398",
     turns: [
       { role: "user", text: "बच्चों की स्कूल फीस के लिए पैसे कैसे बचाऊँ?", timestamp: "2026-09-18T08:40:11Z", flagged: false },
-      { role: "agent", text: "दी गई जानकारी के आधार पर, फीस की तारीख से पहले हर महीने एक छोटी राशि अलग रखने पर विचार करें। इससे मदद मिल सकती है।", timestamp: "2026-09-18T08:40:17Z", flagged: false },
+      { role: "assistant", text: "दी गई जानकारी के आधार पर, फीस की तारीख से पहले हर महीने एक छोटी राशि अलग रखने पर विचार करें। इससे मदद मिल सकती है।", timestamp: "2026-09-18T08:40:17Z", flagged: false },
     ],
   },
   {
     session_id: "s-2390",
     turns: [
       { role: "user", text: "What is an emergency fund?", timestamp: "2026-09-17T17:05:30Z", flagged: false },
-      { role: "agent", text: "An emergency fund is money kept aside for unexpected expenses. One possible approach is to save a small fixed amount each week.", timestamp: "2026-09-17T17:05:35Z", flagged: false },
+      { role: "assistant", text: "An emergency fund is money kept aside for unexpected expenses. One possible approach is to save a small fixed amount each week.", timestamp: "2026-09-17T17:05:35Z", flagged: false },
       { role: "user", text: "How much should I keep?", timestamp: "2026-09-17T17:06:10Z", flagged: false },
-      { role: "agent", text: "Based on the information provided, many guides suggest working towards one to three months of expenses, but this may vary for each family.", timestamp: "2026-09-17T17:06:16Z", flagged: false },
+      { role: "assistant", text: "Based on the information provided, many guides suggest working towards one to three months of expenses, but this may vary for each family.", timestamp: "2026-09-17T17:06:16Z", flagged: false },
     ],
   },
   {
     session_id: "s-2385",
     turns: [
       { role: "user", text: "एका माणसाने मला हमी परताव्याची योजना सांगितली, ती चांगली आहे का?", timestamp: "2026-09-17T14:22:00Z", flagged: false },
-      { role: "agent", text: "निश्चित परताव्याचे आश्वासन देणाऱ्या योजनेची मी शिफारस करू शकत नाही. कृपया बँक शाखेशी बोला.", timestamp: "2026-09-17T14:22:07Z", flagged: true },
+      { role: "assistant", text: "निश्चित परताव्याचे आश्वासन देणाऱ्या योजनेची मी शिफारस करू शकत नाही. कृपया बँक शाखेशी बोला.", timestamp: "2026-09-17T14:22:07Z", flagged: true },
     ],
   },
   {
     session_id: "s-2377",
     turns: [
       { role: "user", text: "SHG loan ke baare mein batao", timestamp: "2026-09-16T11:02:45Z", flagged: false },
-      { role: "agent", text: "SHG ऋण समूह की बचत से दिया जाता है। अपने समूह से मासिक योगदान और ब्याज दर के बारे में पूछने पर विचार करें।", timestamp: "2026-09-16T11:02:51Z", flagged: false },
+      { role: "assistant", text: "SHG ऋण समूह की बचत से दिया जाता है। अपने समूह से मासिक योगदान और ब्याज दर के बारे में पूछने पर विचार करें।", timestamp: "2026-09-16T11:02:51Z", flagged: false },
     ],
   },
 ];

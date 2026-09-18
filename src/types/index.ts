@@ -1,5 +1,5 @@
-export type LanguageCode = "hi" | "te" | "en" | "auto";
-export type UiLanguage = Exclude<LanguageCode, "auto">;
+export type LanguageCode = "hi" | "te" | "en";
+export type UiLanguage = LanguageCode;
 
 export interface AgentQueryRequest {
   session_id: string;
@@ -34,7 +34,7 @@ export interface Transaction {
   note: string;
 }
 
-export type TurnRole = "user" | "agent";
+export type TurnRole = "user" | "assistant";
 
 export interface SessionTurn {
   role: TurnRole;

@@ -1,4 +1,4 @@
-export type LanguageCode = "hi" | "te" | "mr" | "en" | "auto";
+export type LanguageCode = "hi" | "te" | "en" | "auto";
 export type UiLanguage = Exclude<LanguageCode, "auto">;
 
 export interface AgentQueryRequest {

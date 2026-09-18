@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BookOpen, ChevronDown, ExternalLink } from "lucide-react";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface SourcesListProps {
   sources: string[];
 }
 
 export function SourcesList({ sources }: SourcesListProps) {
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
 
   if (!sources || sources.length === 0) return null;
@@ -20,7 +22,7 @@ export function SourcesList({ sources }: SourcesListProps) {
       >
         <BookOpen className="h-3.5 w-3.5" />
         <span>
-          {sources.length} {sources.length === 1 ? "source" : "sources"} verified
+          {sources.length} {sources.length === 1 ? t.source : t.sources} {t.verifiedSources}
         </span>
         <ChevronDown
           className={`h-3.5 w-3.5 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
@@ -38,7 +40,7 @@ export function SourcesList({ sources }: SourcesListProps) {
           >
             <div className="mt-2 space-y-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-background)] p-2.5">
               <p className="text-[11px] font-semibold text-[var(--color-muted-foreground)] uppercase tracking-wider">
-                From Official Financial Education Materials:
+                {t.officialMaterialsShort}:
               </p>
               <ul className="space-y-1 text-xs">
                 {sources.map((src, idx) => (
@@ -47,7 +49,7 @@ export function SourcesList({ sources }: SourcesListProps) {
                     className="flex items-center gap-2 rounded-lg bg-[var(--color-card)] px-2.5 py-1.5 font-medium text-[var(--color-foreground)]"
                   >
                     <span className="flex h-1.5 w-1.5 rounded-full bg-[var(--color-primary)]" />
-                    <span>Source: {src}</span>
+                    <span>{t.sourcePrefix}: {src}</span>
                     <ExternalLink className="ml-auto h-3 w-3 text-[var(--color-muted-foreground)]" />
                   </li>
                 ))}

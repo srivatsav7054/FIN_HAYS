@@ -310,11 +310,7 @@
 }
 
 @utility ambient-grain {
-  background-image:
-    linear-gradient(90deg, oklch(0.3 0.02 60 / 0.025) 1px, transparent 1px),
-    linear-gradient(0deg, oklch(0.3 0.02 60 / 0.02) 1px, transparent 1px);
-  background-size: 34px 34px;
-  mask-image: linear-gradient(to bottom, black, transparent 78%);
+  background: transparent;
 }
 
 @utility warm-grain {

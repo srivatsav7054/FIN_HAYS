@@ -3,6 +3,7 @@ import { type Transaction } from "@/types";
 import { Plus, ArrowUpRight, ArrowDownRight, Edit2, Calendar } from "lucide-react";
 import { AddTransactionModal } from "./AddTransactionModal";
 import { motion } from "framer-motion";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface TransactionListProps {
   transactions: Transaction[];
@@ -13,6 +14,7 @@ export function TransactionList({
   transactions,
   onSaveTransaction,
 }: TransactionListProps) {
+  const { t } = useLanguage();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTx, setEditingTx] = useState<Transaction | null>(null);
   const [filterType, setFilterType] = useState<"all" | "income" | "expense">("all");
@@ -41,10 +43,10 @@ export function TransactionList({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--color-border)] pb-4">
         <div>
           <h4 className="font-display text-lg font-extrabold text-[var(--color-foreground)]">
-            Recent Transactions (नवीनतम लेन-देन विवरण)
+            {t.transactionsTitle}
           </h4>
           <p className="text-xs text-[var(--color-muted-foreground)]">
-            Self-reported entries recorded via voice calls or manual updates
+            {t.transactionsSubtitle}
           </p>
         </div>
 
@@ -53,7 +55,7 @@ export function TransactionList({
           className="btn-shimmer flex min-h-[46px] items-center justify-center gap-2 rounded-2xl bg-[var(--color-primary)] px-5 text-sm font-bold text-white shadow-soft transition-all hover:bg-emerald-800 hover:shadow-glow"
         >
           <Plus className="h-4 w-4 stroke-[2.5]" />
-          <span>Add Transaction (नया दर्ज करें)</span>
+          <span>{t.addEntry}</span>
         </button>
       </div>
 
@@ -68,7 +70,7 @@ export function TransactionList({
               : "bg-[var(--color-secondary)] text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
           }`}
         >
-          All ({transactions.length})
+          {t.all} ({transactions.length})
         </button>
         <button
           type="button"
@@ -79,7 +81,7 @@ export function TransactionList({
               : "bg-[var(--color-secondary)] text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
           }`}
         >
-          Income (+{transactions.filter((t) => t.type === "income").length})
+          {t.income} (+{transactions.filter((t) => t.type === "income").length})
         </button>
         <button
           type="button"
@@ -90,7 +92,7 @@ export function TransactionList({
               : "bg-[var(--color-secondary)] text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
           }`}
         >
-          Expenses (-{transactions.filter((t) => t.type === "expense").length})
+          {t.expensesMinus} (-{transactions.filter((t) => t.type === "expense").length})
         </button>
       </div>
 
@@ -98,7 +100,7 @@ export function TransactionList({
       <div className="divide-y divide-[var(--color-border)]">
         {filteredTransactions.length === 0 ? (
           <div className="py-8 text-center text-sm text-[var(--color-muted-foreground)]">
-            No transactions found matching this filter.
+            {t.noMatchingTransactions}
           </div>
         ) : (
           filteredTransactions.map((tx, idx) => {
@@ -128,7 +130,7 @@ export function TransactionList({
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-bold text-[var(--color-foreground)]">
-                        {tx.category}
+                        {t.categoryNames[tx.category] ?? tx.category}
                       </span>
                       <span
                         className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
@@ -137,7 +139,7 @@ export function TransactionList({
                             : "bg-amber-100 text-amber-800"
                         }`}
                       >
-                        {isIncome ? "Income" : "Expense"}
+                        {isIncome ? t.income : t.expense}
                       </span>
                     </div>
                     <div className="mt-0.5 flex items-center gap-2 text-xs text-[var(--color-muted-foreground)]">
@@ -168,7 +170,7 @@ export function TransactionList({
                   <button
                     onClick={() => handleOpenEdit(tx)}
                     className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--color-muted-foreground)] hover:bg-[var(--color-secondary)] hover:text-[var(--color-foreground)]"
-                    title="Edit transaction"
+                    title={t.editTransactionAction}
                   >
                     <Edit2 className="h-3.5 w-3.5" />
                   </button>

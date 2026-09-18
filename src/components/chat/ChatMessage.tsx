@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Sprout, User, Volume2, VolumeX, Copy, Check } from "lucide-react";
 import { SourcesList } from "./SourcesList";
 import { FlaggedCard } from "./FlaggedCard";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export interface ChatMessageData {
   id: string;
@@ -18,6 +19,7 @@ interface ChatMessageProps {
 }
 
 export function ChatMessage({ message }: ChatMessageProps) {
+  const { t } = useLanguage();
   const isUser = message.role === "user";
   const [isPlaying, setIsPlaying] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -101,7 +103,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
               <div className="flex items-center justify-between gap-2 mb-2 border-b border-amber-300/60 pb-2">
                 <span className="text-xs font-bold text-amber-900 flex items-center gap-1.5">
                   <span className="h-2 w-2 rounded-full bg-amber-500 animate-ping" />
-                  Protected Guidance
+                  {t.protectedGuidance}
                 </span>
                 <div className="flex items-center gap-1">
                   <button
@@ -112,10 +114,10 @@ export function ChatMessage({ message }: ChatMessageProps) {
                         ? "bg-amber-600 text-white shadow-xs"
                         : "bg-amber-200/80 text-amber-950 hover:bg-amber-300"
                     }`}
-                    title={isPlaying ? "Stop audio" : "Listen in Voice (सुनें)"}
+                    title={isPlaying ? t.stop : t.listen}
                   >
                     {isPlaying ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
-                    <span>{isPlaying ? "Stop" : "Listen"}</span>
+                    <span>{isPlaying ? t.stop : t.listen}</span>
                     {isPlaying && (
                       <span className="flex items-center gap-0.5 ml-1">
                         <span className="h-2.5 w-0.5 bg-white animate-pulse" />
@@ -128,7 +130,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
                     type="button"
                     onClick={handleCopy}
                     className="rounded-lg p-1.5 text-amber-900 hover:bg-amber-200 transition-colors"
-                    title="Copy response"
+                    title={t.copyResponse}
                   >
                     {copied ? <Check className="h-3.5 w-3.5 text-emerald-700" /> : <Copy className="h-3.5 w-3.5" />}
                   </button>
@@ -155,9 +157,9 @@ export function ChatMessage({ message }: ChatMessageProps) {
           >
             <div className="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-[var(--color-border)]/60">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-extrabold text-[var(--color-primary)]">Sahaara AI Mitra</span>
+                <span className="text-xs font-extrabold text-[var(--color-primary)]">Sahaara AI</span>
                 <span className="rounded-full bg-[var(--color-primary-soft)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--color-primary)]">
-                  Verified Guide
+                  {t.verifiedGuide}
                 </span>
               </div>
               <div className="flex items-center gap-1.5">
@@ -169,10 +171,10 @@ export function ChatMessage({ message }: ChatMessageProps) {
                       ? "bg-[var(--color-primary)] text-white shadow-xs"
                       : "bg-[var(--color-primary-soft)] text-[var(--color-primary)] hover:bg-emerald-200/70"
                   }`}
-                  title={isPlaying ? "Stop audio" : "Listen to Voice Guidance (सुनें)"}
+                  title={isPlaying ? t.stop : t.listen}
                 >
                   {isPlaying ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
-                  <span>{isPlaying ? "Stop" : "Listen"}</span>
+                  <span>{isPlaying ? t.stop : t.listen}</span>
                   {isPlaying && (
                     <span className="flex items-center gap-0.5 ml-1">
                       <span className="h-2.5 w-0.5 bg-white animate-pulse" />
@@ -185,7 +187,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
                   type="button"
                   onClick={handleCopy}
                   className="rounded-lg p-1.5 text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] hover:bg-[var(--color-secondary)] transition-colors"
-                  title="Copy guidance"
+                  title={t.copyResponse}
                 >
                   {copied ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
                 </button>

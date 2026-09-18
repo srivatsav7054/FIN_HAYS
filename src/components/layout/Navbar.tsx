@@ -1,27 +1,29 @@
 import { useState } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useAuthSession } from "@/hooks/useAuth";
 import { type UiLanguage } from "@/types";
-import { Sprout, MessageSquare, User, LayoutDashboard, Menu, X, PhoneCall, Globe } from "lucide-react";
+import { Sprout, MessageSquare, User, LayoutDashboard, Menu, X, PhoneCall, Globe, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
 
 const languages: { code: UiLanguage; label: string; native: string }[] = [
   { code: "en", label: "English", native: "English" },
   { code: "hi", label: "Hindi", native: "हिन्दी" },
   { code: "te", label: "Telugu", native: "తెలుగు" },
-  { code: "mr", label: "Marathi", native: "मराठी" },
 ];
 
 export function Navbar() {
   const { lang, setLang, t } = useLanguage();
+  const { session, signOut } = useAuthSession();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
     { to: "/", label: t?.navHome ?? "Home", icon: Sprout },
     { to: "/demo", label: t?.navDemo ?? "AI Demo", icon: MessageSquare },
-    { to: "/users/u-101", label: t?.navProfile ?? "My Profile", icon: User },
-    { to: "/dashboard", label: t?.navDashboard ?? "Dashboard", icon: LayoutDashboard },
+    ...(session?.role === "admin"
+      ? [{ to: "/dashboard", label: "Operations", icon: LayoutDashboard }]
+      : [{ to: "/users/u-101", label: t?.navProfile ?? "My Profile", icon: User }]),
   ];
 
   const isActive = (path: string) => {
@@ -41,9 +43,6 @@ export function Navbar() {
             <div className="flex items-center gap-2">
               <span className="font-display text-2xl font-bold tracking-tight text-[var(--color-foreground)]">
                 Sahaara
-              </span>
-              <span className="rounded-full bg-[var(--color-primary-soft)] px-2.5 py-0.5 text-xs font-bold text-[var(--color-primary)]">
-                SH-105
               </span>
             </div>
             <p className="text-xs font-medium text-[var(--color-muted-foreground)]">
@@ -108,6 +107,17 @@ export function Navbar() {
             </div>
           </div>
 
+          {session ? (
+            <motion.button
+              onClick={signOut}
+              whileHover={{ scale: 1.02 }}
+              className="flex items-center gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)]/90 px-3.5 py-2 text-xs font-bold text-[var(--color-foreground)] shadow-2xs"
+              title={`Sign out ${session.name}`}
+            >
+              <LogOut className="h-3.5 w-3.5 text-[var(--color-primary)]" />
+              <span>Sign out</span>
+            </motion.button>
+          ) : (
           <motion.div
             whileHover={{ scale: 1.02 }}
             className="flex items-center gap-2 rounded-2xl border border-amber-200/90 bg-amber-50/80 px-3.5 py-2 text-xs font-bold text-amber-900 shadow-2xs"
@@ -116,6 +126,7 @@ export function Navbar() {
             <PhoneCall className="h-3.5 w-3.5 text-amber-700" />
             <span>Bank Sakhi Helpline</span>
           </motion.div>
+          )}
         </div>
 
         {/* Mobile menu button */}

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { type UserProfile } from "@/types";
 import { TrendingUp, TrendingDown, Target, Edit3, Check, X, PiggyBank, Calendar, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface FinancialOverviewProps {
   profile: UserProfile;
@@ -9,6 +10,7 @@ interface FinancialOverviewProps {
 }
 
 export function FinancialOverview({ profile, onUpdate }: FinancialOverviewProps) {
+  const { t } = useLanguage();
   const [isEditing, setIsEditing] = useState(false);
   const [income, setIncome] = useState(profile.monthly_income);
   const [expenses, setExpenses] = useState(profile.monthly_expenses);
@@ -46,10 +48,10 @@ export function FinancialOverview({ profile, onUpdate }: FinancialOverviewProps)
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
         <div>
           <h3 className="font-display text-xl sm:text-2xl font-black text-[var(--color-foreground)] tracking-tight">
-            Financial Overview (मासिक वित्तीय स्थिति)
+            {t.overviewTitle}
           </h3>
           <p className="text-xs text-[var(--color-muted-foreground)] font-medium">
-            Self-reported monthly cash flows and long-term savings target
+            {t.overviewSubtitle}
           </p>
         </div>
 
@@ -60,7 +62,7 @@ export function FinancialOverview({ profile, onUpdate }: FinancialOverviewProps)
             style={{ boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.8)" }}
           >
             <Edit3 className="h-3.5 w-3.5" />
-            <span>Edit Monthly Numbers</span>
+            <span>{t.editNumbers}</span>
           </button>
         ) : (
           <div className="flex items-center gap-2">
@@ -74,7 +76,7 @@ export function FinancialOverview({ profile, onUpdate }: FinancialOverviewProps)
               className="flex items-center gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] px-3 py-1.5 text-xs font-bold text-[var(--color-foreground)] hover:bg-rose-50 hover:text-rose-700"
             >
               <X className="h-3.5 w-3.5" />
-              <span>Cancel</span>
+              <span>{t.cancel}</span>
             </button>
             <button
               onClick={handleSave}
@@ -82,7 +84,7 @@ export function FinancialOverview({ profile, onUpdate }: FinancialOverviewProps)
               className="flex items-center gap-1.5 rounded-lg bg-[var(--color-primary)] px-4 py-2 text-xs font-bold text-white shadow-sm hover:opacity-90 disabled:opacity-50"
             >
               <Check className="h-3.5 w-3.5" />
-              <span>{isSaving ? "Saving..." : "Save Numbers"}</span>
+              <span>{isSaving ? t.savingNumbers : t.saveNumbers}</span>
             </button>
           </div>
         )}
@@ -101,10 +103,10 @@ export function FinancialOverview({ profile, onUpdate }: FinancialOverviewProps)
           <div className="flex items-center justify-between text-xs font-bold text-[var(--color-muted-foreground)]">
             <span className="flex items-center gap-1.5">
               <TrendingUp className="h-4 w-4 text-[var(--color-primary)]" />
-              <span>Monthly Income (मासिक आय)</span>
+              <span>{t.monthlyIncome}</span>
             </span>
             <span className="rounded-full bg-[var(--color-primary-soft)] px-2.5 py-0.5 text-[10px] text-[var(--color-primary)] font-bold">
-              Inflow
+              {t.inflow}
             </span>
           </div>
 
@@ -126,7 +128,7 @@ export function FinancialOverview({ profile, onUpdate }: FinancialOverviewProps)
               </div>
             )}
             <p className="mt-1.5 text-xs text-[var(--color-muted-foreground)] font-medium">
-              From farming, dairy sales, and micro-tailoring
+              {t.fromFarming}
             </p>
           </div>
         </motion.div>
@@ -142,10 +144,10 @@ export function FinancialOverview({ profile, onUpdate }: FinancialOverviewProps)
           <div className="flex items-center justify-between text-xs font-bold text-amber-900">
             <span className="flex items-center gap-1.5">
               <TrendingDown className="h-4 w-4 text-amber-600" />
-              <span>Monthly Expenses (मासिक खर्च)</span>
+              <span>{t.monthlyExpenses}</span>
             </span>
             <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[10px] text-amber-800 font-bold">
-              Outflow
+              {t.outflow}
             </span>
           </div>
 
@@ -167,7 +169,7 @@ export function FinancialOverview({ profile, onUpdate }: FinancialOverviewProps)
               </div>
             )}
             <p className="mt-1.5 text-xs text-amber-800 font-medium">
-              Ration, school fees, transport &amp; seed costs
+              {t.expenseDescription}
             </p>
           </div>
         </motion.div>
@@ -183,10 +185,10 @@ export function FinancialOverview({ profile, onUpdate }: FinancialOverviewProps)
           <div className="flex items-center justify-between text-xs font-bold text-[var(--color-muted-foreground)]">
             <span className="flex items-center gap-1.5">
               <Target className="h-4 w-4 text-[var(--color-accent)]" />
-              <span>Savings Goal (बचत लक्ष्य)</span>
+              <span>{t.savingsGoal}</span>
             </span>
             <span className="rounded-full bg-[var(--color-accent-soft)] px-2.5 py-0.5 text-[10px] text-[var(--color-accent)] font-bold">
-              Target
+              {t.target}
             </span>
           </div>
 
@@ -209,7 +211,7 @@ export function FinancialOverview({ profile, onUpdate }: FinancialOverviewProps)
             )}
             <div className="mt-2.5">
               <div className="flex items-center justify-between text-[11px] font-semibold text-[var(--color-muted-foreground)] mb-1">
-                <span>Estimated 6-Month Progress</span>
+                <span>{t.estimatedProgress}</span>
                 <span className="font-bold text-[var(--color-foreground)]">{progressPercent}%</span>
               </div>
               <div className="h-2.5 w-full rounded-full bg-[var(--color-secondary)] overflow-hidden">
@@ -237,16 +239,16 @@ export function FinancialOverview({ profile, onUpdate }: FinancialOverviewProps)
             </div>
             <div>
               <div className="text-xs font-bold uppercase tracking-wider text-emerald-800">
-                Monthly Available Surplus (उपलब्ध मासिक बचत)
+                {t.monthlySurplus}
               </div>
               <div className="font-mono text-2xl font-extrabold text-emerald-950">
-                ₹{surplus.toLocaleString("en-IN")} / month
+                ₹{surplus.toLocaleString("en-IN")} / {t.perMonth}
               </div>
             </div>
           </div>
 
           <div className="text-xs font-semibold text-emerald-900 bg-white/75 rounded-lg px-3.5 py-2 border border-emerald-200">
-            Income (₹{income.toLocaleString("en-IN")}) − Expenses (₹{expenses.toLocaleString("en-IN")})
+            {t.incomeMinus} (₹{income.toLocaleString("en-IN")}) − {t.expensesMinus} (₹{expenses.toLocaleString("en-IN")})
           </div>
         </div>
       </motion.div>

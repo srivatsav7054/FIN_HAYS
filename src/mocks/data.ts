@@ -18,21 +18,12 @@ const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const profiles: Record<string, UserProfile> = {
   "u-101": {
     user_id: "u-101",
-    name: "Lakshmi Devi",
+    name: "Sahaara User",
     preferred_language: "te",
     phone_number: "9876567890",
     monthly_income: 18000,
     monthly_expenses: 11500,
     savings_goal: 30000,
-  },
-  "u-102": {
-    user_id: "u-102",
-    name: "Sunita Pawar",
-    preferred_language: "mr",
-    phone_number: "9123412345",
-    monthly_income: 14000,
-    monthly_expenses: 9800,
-    savings_goal: 20000,
   },
 };
 
@@ -46,11 +37,6 @@ const transactions: Record<string, Transaction[]> = {
     { id: "t-6", date: "2026-09-12", type: "expense", category: "Transport", amount: 800, note: "Bus to market" },
     { id: "t-7", date: "2026-09-14", type: "expense", category: "Healthcare", amount: 1500, note: "Clinic visit" },
     { id: "t-8", date: "2026-09-16", type: "expense", category: "Other", amount: 1600, note: "Festival items" },
-  ],
-  "u-102": [
-    { id: "t-9", date: "2026-09-01", type: "income", category: "Other", amount: 14000, note: "Dairy cooperative" },
-    { id: "t-10", date: "2026-09-04", type: "expense", category: "Groceries", amount: 3100, note: "" },
-    { id: "t-11", date: "2026-09-09", type: "expense", category: "Healthcare", amount: 2200, note: "Medicines" },
   ],
 };
 
@@ -208,7 +194,7 @@ const sessionLang: Record<string, string> = {
   "s-2401": "te",
   "s-2398": "hi",
   "s-2390": "en",
-  "s-2385": "mr",
+  "s-2385": "en",
   "s-2377": "hi",
 };
 

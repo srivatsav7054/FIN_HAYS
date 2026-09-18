@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { type SessionSummary } from "@/types";
 import { MessageSquare, ShieldAlert, Globe, Activity, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface StatRowProps {
   sessions: SessionSummary[];
@@ -34,6 +35,7 @@ function AnimatedCounter({ value, duration = 0.8 }: { value: number; duration?: 
 }
 
 export function StatRow({ sessions }: StatRowProps) {
+  const { t } = useLanguage();
   const totalSessions = sessions.length;
   const flaggedCount = sessions.filter((s) => s.flagged).length;
   const flaggedPercent =
@@ -45,7 +47,6 @@ export function StatRow({ sessions }: StatRowProps) {
   const langNames: Record<string, string> = {
     hi: "Hindi",
     te: "Telugu",
-    mr: "Marathi",
     en: "English",
   };
 
@@ -61,7 +62,7 @@ export function StatRow({ sessions }: StatRowProps) {
         style={{ boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 4px 18px -4px rgba(50, 40, 30, 0.08)" }}
       >
         <div className="flex items-center justify-between text-xs font-bold text-[var(--color-muted-foreground)]">
-          <span>Total Call Sessions</span>
+          <span>{t.totalCallSessions}</span>
           <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[var(--color-primary-soft)] text-[var(--color-primary)] shadow-2xs">
             <MessageSquare className="h-4 w-4" />
           </div>
@@ -71,7 +72,7 @@ export function StatRow({ sessions }: StatRowProps) {
         </div>
         <div className="flex items-center gap-1.5 text-xs text-[var(--color-muted-foreground)] font-medium">
           <TrendingUp className="h-3.5 w-3.5 text-[var(--color-primary)]" />
-          <span>Recorded voice conversations</span>
+          <span>{t.recordedConversations}</span>
         </div>
       </motion.div>
 
@@ -85,7 +86,7 @@ export function StatRow({ sessions }: StatRowProps) {
         style={{ boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 4px 18px -4px rgba(217, 119, 6, 0.1)" }}
       >
         <div className="flex items-center justify-between text-xs font-bold text-amber-900">
-          <span>Safety Flagged Turns</span>
+          <span>{t.safetyFlaggedTurns}</span>
           <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-amber-200 text-amber-900 shadow-2xs">
             <ShieldAlert className="h-4 w-4" />
           </div>
@@ -95,11 +96,11 @@ export function StatRow({ sessions }: StatRowProps) {
             <AnimatedCounter value={flaggedCount} />
           </span>
           <span className="text-xs font-bold text-amber-800 font-mono">
-            ({flaggedPercent}% intercepted)
+            ({flaggedPercent}% {t.intercepted})
           </span>
         </div>
         <p className="text-xs text-amber-900/90 leading-tight font-medium">
-          Unsafe or scam queries blocked
+          {t.unsafeQueriesBlocked}
         </p>
       </motion.div>
 
@@ -113,7 +114,7 @@ export function StatRow({ sessions }: StatRowProps) {
         style={{ boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 4px 18px -4px rgba(50, 40, 30, 0.08)" }}
       >
         <div className="flex items-center justify-between text-xs font-bold text-[var(--color-muted-foreground)]">
-          <span>Languages Active</span>
+          <span>{t.languagesActive}</span>
           <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[var(--color-secondary)] text-[var(--color-foreground)] shadow-2xs">
             <Globe className="h-4 w-4" />
           </div>
@@ -136,7 +137,7 @@ export function StatRow({ sessions }: StatRowProps) {
         style={{ boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 4px 18px -4px rgba(74, 122, 88, 0.08)" }}
       >
         <div className="flex items-center justify-between text-xs font-bold text-emerald-900">
-          <span>Live Call Status</span>
+          <span>{t.liveCallStatus}</span>
           <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-emerald-200 text-emerald-900 shadow-2xs">
             <Activity className="h-4 w-4" />
           </div>
@@ -146,11 +147,11 @@ export function StatRow({ sessions }: StatRowProps) {
             <AnimatedCounter value={activeCount} />
           </span>
           <span className="text-xs font-bold text-emerald-800 font-mono">
-            active right now
+            {t.activeRightNow}
           </span>
         </div>
         <p className="text-xs text-emerald-800 leading-tight font-medium">
-          {totalSessions - activeCount} sessions completed
+          {totalSessions - activeCount} {t.sessionsCompleted}
         </p>
       </motion.div>
     </div>

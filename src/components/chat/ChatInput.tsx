@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, type FormEvent, type KeyboardEvent } from "react";
 import { Mic, Send, Sparkles } from "lucide-react";
 import { type LanguageCode } from "@/types";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface ChatInputProps {
   onSend: (text: string, language: LanguageCode) => void;
@@ -10,10 +11,8 @@ interface ChatInputProps {
 }
 
 const languageOptions: { code: LanguageCode; label: string; native: string }[] = [
-  { code: "auto", label: "Auto-detect", native: "Auto-detect" },
   { code: "hi", label: "Hindi", native: "हिन्दी (Hindi)" },
   { code: "te", label: "Telugu", native: "తెలుగు (Telugu)" },
-  { code: "mr", label: "Marathi", native: "मराठी (Marathi)" },
   { code: "en", label: "English", native: "English" },
 ];
 
@@ -33,11 +32,6 @@ const samplePromptsByLang: Record<LanguageCode, { text: string; label: string; i
     { text: "SHG రుణం గురించి మరియు వడ్డీ గురించి చెప్పండి.", label: "SHG సమాచారం" },
     { text: "నా డబ్బును రెండు నెలల్లో రెట్టింపు చేసే పథకం ఉందా?", label: "ఫ్లాగ్ చేయబడిన డెమో (రిస్క్)", isFlaggedDemo: true },
   ],
-  mr: [
-    { text: "आपत्कालीन निधी म्हणजे काय आणि तो कसा सुरू करावा?", label: "बचत माहिती" },
-    { text: "बचत गट (SHG) कर्जाचे नियम काय आहेत?", label: "बचत गट कर्ज" },
-    { text: "हमी परतावा देणारी खाजगी योजना सुरक्षित आहे का?", label: "सुरक्षा फ्लॅग चाचणी", isFlaggedDemo: true },
-  ],
   auto: [
     { text: "What is an emergency fund and how should I start one?", label: "Emergency Fund" },
     { text: "SHG ऋण के बारे में जानकारी दें।", label: "SHG जानकारी" },
@@ -51,6 +45,7 @@ export function ChatInput({
   selectedLanguage,
   onLanguageChange,
 }: ChatInputProps) {
+  const { t } = useLanguage();
   const [input, setInput] = useState("");
   const [isListening, setIsListening] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -89,8 +84,6 @@ export function ChatInput({
             ? "मुझे आपातकालीन निधि के बारे में बताएं"
             : selectedLanguage === "te"
             ? "నాకు పొదుపు పథకాల గురించి చెప్పండి"
-            : selectedLanguage === "mr"
-            ? "मला बचत गटाबद्दल माहिती हवी आहे"
             : "Tell me how to start saving ₹500 every month";
         setInput(demoSpeech);
       }, 1800);
@@ -106,7 +99,7 @@ export function ChatInput({
       <div className="mb-3.5 flex flex-wrap items-center gap-2">
         <span className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-muted-foreground)]">
           <Sparkles className="h-3.5 w-3.5 text-[var(--color-primary)]" />
-          <span>Quick Questions:</span>
+          <span>{t.quickQuestions}:</span>
         </span>
         {prompts.map((p, i) => (
           <button
@@ -129,7 +122,7 @@ export function ChatInput({
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <label htmlFor="lang-select" className="text-xs font-bold text-[var(--color-foreground)]">
-              Response Language:
+              {t.responseLanguage}:
             </label>
             <select
               id="lang-select"
@@ -146,7 +139,7 @@ export function ChatInput({
           </div>
 
           <span className="text-[11px] font-medium text-[var(--color-muted-foreground)] hidden sm:inline">
-            Press Enter to send, Shift+Enter for new line
+            {t.keyboardHint}
           </span>
         </div>
 

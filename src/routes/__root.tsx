@@ -77,10 +77,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Sahaara (SH-105) — Rural Financial Empowerment Dashboard" },
+      { title: "Sahaara — Rural Financial Empowerment" },
       { name: "description", content: "AI-Powered Financial Empowerment Platform for Rural Women" },
-      { name: "author", content: "Sahaara SH-105" },
-      { property: "og:title", content: "Sahaara (SH-105) — Financial Empowerment" },
+      { name: "author", content: "Sahaara" },
+      { property: "og:title", content: "Sahaara — Financial Empowerment" },
       { property: "og:description", content: "AI-Powered Financial Empowerment Platform for Rural Women" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

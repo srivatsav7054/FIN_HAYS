@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { type Transaction, type TransactionType, TRANSACTION_CATEGORIES } from "@/types";
 import { X, PlusCircle, Check } from "lucide-react";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface AddTransactionModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ export function AddTransactionModal({
   onSave,
   initialData,
 }: AddTransactionModalProps) {
+  const { t } = useLanguage();
   const [type, setType] = useState<TransactionType>(initialData?.type || "expense");
   const [category, setCategory] = useState<string>(initialData?.category || "Groceries");
   const [amount, setAmount] = useState<string>(initialData ? String(initialData.amount) : "");
@@ -59,10 +61,10 @@ export function AddTransactionModal({
             </div>
             <div>
               <h3 className="font-display text-lg font-bold text-[var(--color-foreground)]">
-                {initialData ? "Edit Transaction (लेन-देन सुधारें)" : "Add Self-Reported Entry (नया लेन-देन)"}
+                {initialData ? t.modalEditTitle : t.modalAddTitle}
               </h3>
               <p className="text-xs text-[var(--color-muted-foreground)]">
-                All records remain confidential and self-reported
+                {t.confidentialRecords}
               </p>
             </div>
           </div>
@@ -79,7 +81,7 @@ export function AddTransactionModal({
           {/* Type Switcher */}
           <div>
             <label className="text-xs font-bold text-[var(--color-foreground)] block mb-1.5">
-              Entry Type (लेन-देन का प्रकार)
+              {t.entryType}
             </label>
             <div className="grid grid-cols-2 gap-2">
               <button
@@ -91,7 +93,7 @@ export function AddTransactionModal({
                     : "border-[var(--color-border)] bg-[var(--color-background)] text-[var(--color-muted-foreground)]"
                 }`}
               >
-                Expense (खर्च Outflow)
+                {t.expenseOutflow}
               </button>
               <button
                 type="button"
@@ -102,7 +104,7 @@ export function AddTransactionModal({
                     : "border-[var(--color-border)] bg-[var(--color-background)] text-[var(--color-muted-foreground)]"
                 }`}
               >
-                Income (आय Inflow)
+                {t.incomeInflow}
               </button>
             </div>
           </div>
@@ -110,7 +112,7 @@ export function AddTransactionModal({
           {/* Amount */}
           <div>
             <label className="text-xs font-bold text-[var(--color-foreground)] block mb-1.5">
-              Amount (राशि ₹)
+              {t.amountLabel}
             </label>
             <div className="relative flex items-center">
               <span className="absolute left-4 font-mono font-bold text-lg text-[var(--color-primary)]">
@@ -131,7 +133,7 @@ export function AddTransactionModal({
           {/* Category */}
           <div>
             <label className="text-xs font-bold text-[var(--color-foreground)] block mb-1.5">
-              Category (श्रेणी)
+              {t.categoryLabel}
             </label>
             <select
               value={category}
@@ -140,7 +142,7 @@ export function AddTransactionModal({
             >
               {TRANSACTION_CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>
-                  {cat}
+                  {t.categoryNames[cat] ?? cat}
                 </option>
               ))}
             </select>
@@ -149,7 +151,7 @@ export function AddTransactionModal({
           {/* Date */}
           <div>
             <label className="text-xs font-bold text-[var(--color-foreground)] block mb-1.5">
-              Date (दिनांक)
+              {t.dateLabel}
             </label>
             <input
               type="date"
@@ -163,13 +165,13 @@ export function AddTransactionModal({
           {/* Note */}
           <div>
             <label className="text-xs font-bold text-[var(--color-foreground)] block mb-1.5">
-              Note or Purpose (विवरण / टिप्पणी)
+              {t.notePurpose}
             </label>
             <input
               type="text"
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="e.g. Fertilizer & seeds, monthly ration"
+              placeholder={t.notePlaceholder}
               className="w-full rounded-lg border-2 border-[var(--color-border)] bg-[var(--color-background)] px-3 py-2.5 text-sm focus:border-[var(--color-primary)] focus:outline-none"
             />
           </div>
@@ -181,7 +183,7 @@ export function AddTransactionModal({
               onClick={onClose}
               className="min-h-[48px] rounded-lg border border-[var(--color-border)] px-5 text-sm font-bold text-[var(--color-foreground)] hover:bg-[var(--color-secondary)]"
             >
-              Cancel
+              {t.cancel}
             </button>
             <button
               type="submit"
@@ -189,7 +191,7 @@ export function AddTransactionModal({
               className="flex min-h-[48px] items-center gap-2 rounded-lg bg-[var(--color-primary)] px-6 text-sm font-bold text-white shadow-sm hover:opacity-95 disabled:opacity-50"
             >
               <Check className="h-4 w-4" />
-              <span>{submitting ? "Saving..." : "Save Record"}</span>
+              <span>{submitting ? t.savingNumbers : t.saveRecord}</span>
             </button>
           </div>
         </form>

@@ -12,6 +12,7 @@ import { Footer } from "@/components/layout/Footer";
 import { type UserProfile, type Transaction } from "@/types";
 import { ShieldCheck, UserCheck, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import { useAuthSession } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/users/$id")({
   component: UserProfilePage,
@@ -19,6 +20,7 @@ export const Route = createFileRoute("/users/$id")({
 
 export function UserProfilePage() {
   const { id } = Route.useParams();
+  const { session } = useAuthSession();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,6 +47,10 @@ export function UserProfilePage() {
   useEffect(() => {
     loadData(id || "u-101");
   }, [id]);
+
+  const displayProfile = profile && session?.role === "user"
+    ? { ...profile, name: session.name }
+    : profile;
 
   const handleUpdateProfile = async (updated: UserProfile) => {
     if (!profile) return;
@@ -82,7 +88,7 @@ export function UserProfilePage() {
               <UserCheck className="h-4 w-4 text-[var(--color-primary)]" />
               <span>Current Beneficiary View:</span>
               <strong className="text-[var(--color-foreground)]">
-                {profile ? `${profile.name} (${profile.user_id})` : id}
+                {displayProfile ? `${displayProfile.name} (${displayProfile.user_id})` : id}
               </strong>
             </div>
             <div className="flex items-center gap-2 text-xs">
@@ -96,18 +102,7 @@ export function UserProfilePage() {
                     : "border border-[var(--color-border)] bg-[var(--color-background)] text-[var(--color-foreground)] hover:bg-[var(--color-secondary)]"
                 }`}
               >
-                Lakshmi Devi (u-101)
-              </Link>
-              <Link
-                to="/users/$id"
-                params={{ id: "u-102" }}
-                className={`rounded-xl px-3 py-1 font-bold transition-all ${
-                  id === "u-102"
-                    ? "bg-[var(--color-primary)] text-white shadow-xs"
-                    : "border border-[var(--color-border)] bg-[var(--color-background)] text-[var(--color-foreground)] hover:bg-[var(--color-secondary)]"
-                }`}
-              >
-                Sunita Pawar (u-102)
+                Personal profile
               </Link>
             </div>
           </motion.div>
@@ -132,19 +127,19 @@ export function UserProfilePage() {
                 Try Again
               </button>
             </div>
-          ) : profile ? (
+          ) : displayProfile ? (
             <div className="space-y-10">
               {/* Profile Card */}
-              <ProfileCard profile={profile} />
+              <ProfileCard profile={displayProfile} />
 
               {/* Editable Financial Overview Numbers */}
               <FinancialOverview
-                profile={profile}
+                profile={displayProfile}
                 onUpdate={handleUpdateProfile}
               />
 
               {/* AI Financial Insight Panel */}
-              <FinancialInsightPanel profile={profile} />
+              <FinancialInsightPanel profile={displayProfile} />
 
               {/* Chart & Transactions Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">

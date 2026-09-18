@@ -1,12 +1,14 @@
 import { type UserProfile } from "@/types";
 import { Sparkles, HelpCircle, CheckCircle2, ShieldAlert } from "lucide-react";
 import { motion } from "framer-motion";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface FinancialInsightPanelProps {
   profile: UserProfile;
 }
 
 export function FinancialInsightPanel({ profile }: FinancialInsightPanelProps) {
+  const { t } = useLanguage();
   const surplus = profile.monthly_income - profile.monthly_expenses;
   const monthsToGoal =
     surplus > 0 ? Math.ceil(profile.savings_goal / surplus) : 0;
@@ -27,34 +29,34 @@ export function FinancialInsightPanel({ profile }: FinancialInsightPanelProps) {
           </div>
           <div>
             <h4 className="font-display text-lg font-bold text-[var(--color-foreground)]">
-              Personalised Financial Guidance
+              {t.personalisedGuidance}
             </h4>
             <p className="text-xs text-[var(--color-muted-foreground)]">
-              Guidance based on official NCFE financial education materials
+              {t.officialMaterials}
             </p>
           </div>
         </div>
         <span className="rounded-full bg-[var(--color-primary-soft)] px-3 py-1 text-xs font-bold text-[var(--color-primary)] hidden sm:inline">
-          Educational Guidance
+          {t.educationalGuidance}
         </span>
       </div>
 
       {/* Snapshot Summary Rows */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-3.5 shadow-2xs">
-          <span className="text-[11px] font-bold text-[var(--color-muted-foreground)]">Reported Income</span>
+          <span className="text-[11px] font-bold text-[var(--color-muted-foreground)]">{t.reportedIncome}</span>
           <div className="font-mono text-lg font-extrabold text-[var(--color-foreground)]">
             ₹{profile.monthly_income.toLocaleString("en-IN")}
           </div>
         </div>
         <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-3.5 shadow-2xs">
-          <span className="text-[11px] font-bold text-[var(--color-muted-foreground)]">Reported Expenses</span>
+          <span className="text-[11px] font-bold text-[var(--color-muted-foreground)]">{t.reportedExpenses}</span>
           <div className="font-mono text-lg font-extrabold text-[var(--color-foreground)]">
             ₹{profile.monthly_expenses.toLocaleString("en-IN")}
           </div>
         </div>
         <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-3.5 shadow-2xs">
-          <span className="text-[11px] font-bold text-[var(--color-muted-foreground)]">Target Goal</span>
+          <span className="text-[11px] font-bold text-[var(--color-muted-foreground)]">{t.targetGoal}</span>
           <div className="font-mono text-lg font-extrabold text-[var(--color-foreground)]">
             ₹{profile.savings_goal.toLocaleString("en-IN")}
           </div>
@@ -65,23 +67,19 @@ export function FinancialInsightPanel({ profile }: FinancialInsightPanelProps) {
       <div className="rounded-2xl border border-[var(--color-primary)]/40 bg-[var(--color-primary-soft)]/40 p-5 space-y-3 shadow-2xs">
         <div className="flex items-center gap-2 text-sm font-bold text-[var(--color-primary)]">
           <CheckCircle2 className="h-4 w-4" />
-          <span>Sahaara's Guidance</span>
+          <span>{t.sahaaraGuidance}</span>
         </div>
 
         <p className="text-sm font-medium text-[var(--color-foreground)] leading-relaxed">
-          &ldquo;Based on the information provided, your current expense pattern leaves approximately{" "}
-          <strong className="text-[var(--color-primary)] font-mono text-base">
-            ₹{surplus.toLocaleString("en-IN")}
-          </strong>{" "}
-          before your savings goal. One possible approach is to set aside ₹2,000 to ₹3,000 per month into a secure, government-backed bank recurring deposit (RD) or Post Office savings account. If this pace is maintained, reaching your ₹{profile.savings_goal.toLocaleString("en-IN")} goal may take approximately {monthsToGoal} months.&rdquo;
+          &ldquo;{surplus > 0 ? t.insightText(`₹${surplus.toLocaleString("en-IN")}`) : t.insightNegative} {t.insightMonths(monthsToGoal)}&rdquo;
         </p>
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-t border-[var(--color-border)]/50 pt-3 text-xs text-[var(--color-muted-foreground)]">
           <div className="flex items-center gap-1.5">
             <HelpCircle className="h-3.5 w-3.5 text-[var(--color-primary)]" />
-            <span>Consider speaking with your Gram Panchayat Bank Sakhi to verify savings options.</span>
+            <span>{t.bankSakhiAdvice}</span>
           </div>
-          <span className="italic">Based on NCFE Financial Literacy Guide</span>
+          <span className="italic">{t.basedOnGuide}</span>
         </div>
       </div>
 
@@ -89,7 +87,7 @@ export function FinancialInsightPanel({ profile }: FinancialInsightPanelProps) {
       <div className="flex items-start gap-2.5 rounded-2xl border border-amber-200 bg-amber-50/70 p-3.5 text-xs text-amber-900 shadow-2xs">
         <ShieldAlert className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
         <p className="leading-relaxed">
-          <strong>Safety Guardrail Active:</strong> Sahaara never guarantees savings or returns. All insights are educational guidance designed to support informed family budgeting.
+          <strong>{t.safetyGuardrail}:</strong> {t.safetyText}
         </p>
       </div>
     </motion.div>

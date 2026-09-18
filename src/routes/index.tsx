@@ -11,6 +11,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
@@ -22,6 +23,7 @@ const heroItem = {
 };
 
 export function LandingPage() {
+  const { t } = useLanguage();
   return (
     <div className="app-shell relative flex min-h-screen flex-col overflow-x-hidden">
       {/* Dynamic Animated Ambient Mesh Background Blobs */}
@@ -55,21 +57,17 @@ export function LandingPage() {
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--color-primary)] opacity-75" />
                     <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[var(--color-primary)]" />
                   </span>
-                  <span>SH-105 • Rural Financial Empowerment Voice AI</span>
+                  <span>{t.landingMission}</span>
                 </motion.div>
 
                 {/* Main Headline */}
                 <motion.h1 variants={heroItem} className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-[var(--color-foreground)] leading-[1.05]">
-                  Financial guidance,{" "}
-                  <span className="relative inline-block text-[var(--color-accent)]">
-                    made simple.
-                    <span className="absolute left-0 bottom-1.5 h-3 w-full bg-[var(--color-accent-soft)]/70 -z-10 rounded-sm" />
-                  </span>
+                  {t.landingHeadline}
                 </motion.h1>
 
                 {/* Explainer */}
                 <motion.p variants={heroItem} className="text-lg sm:text-xl text-[var(--color-muted-foreground)] leading-relaxed max-w-2xl font-medium">
-                  Sahaara provides voice-first financial guidance and budgeting assistance designed specifically for rural Indian women and Self-Help Group leaders. Speak naturally over a regular phone call in Hindi, Telugu, Marathi, or English.
+                  {t.heroBody}
                 </motion.p>
 
                 {/* CTAs with Spring Micro-interactions and Soft Shadow Bloom */}
@@ -80,11 +78,11 @@ export function LandingPage() {
                     transition={{ type: "spring", stiffness: 400, damping: 17 }}
                   >
                     <Link
-                      to="/demo"
+                      to="/login"
                       className="btn-shimmer flex min-h-[56px] items-center justify-center gap-3 rounded-lg bg-[var(--color-primary)] px-8 py-3.5 text-base font-bold text-white shadow-lift transition-all hover:shadow-glow hover:bg-emerald-800"
                     >
                       <MessageSquare className="h-5 w-5" />
-                      <span>Try AI Demo Console</span>
+                      <span>{t.enterSahaara}</span>
                       <ArrowRight className="h-4 w-4" />
                     </Link>
                   </motion.div>
@@ -95,12 +93,12 @@ export function LandingPage() {
                     transition={{ type: "spring", stiffness: 400, damping: 17 }}
                   >
                     <Link
-                      to="/dashboard"
+                      to="/login"
                       className="flex min-h-[56px] items-center justify-center gap-2.5 rounded-lg border-2 border-[var(--color-border)] bg-[var(--color-card)] px-7 py-3.5 text-base font-bold text-[var(--color-foreground)] shadow-soft transition-all hover:bg-[var(--color-secondary)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)]"
                       style={{ boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.85)" }}
                     >
                       <LayoutDashboard className="h-5 w-5" />
-                      <span>View Session Monitor</span>
+                      <span>{t.chooseWorkspace}</span>
                     </Link>
                   </motion.div>
                 </motion.div>
@@ -114,7 +112,7 @@ export function LandingPage() {
                     <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100 text-[var(--color-accent)] shadow-2xs">
                       <PhoneCall className="h-4 w-4" />
                     </span>
-                    <span>Voice-First Accessible</span>
+                    <span>{t.voiceAccessible}</span>
                   </motion.div>
 
                   <motion.div
@@ -124,7 +122,7 @@ export function LandingPage() {
                     <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-[var(--color-primary)] shadow-2xs">
                       <ShieldCheck className="h-4 w-4" />
                     </span>
-                    <span>Privacy Guaranteed (No Bank Linking)</span>
+                    <span>{t.privacyNoLinking}</span>
                   </motion.div>
 
                   <motion.div
@@ -134,7 +132,7 @@ export function LandingPage() {
                     <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100 text-amber-800 shadow-2xs">
                       <Sparkles className="h-4 w-4" />
                     </span>
-                    <span>Official Grounded Guidance</span>
+                    <span>{t.officialGuidance}</span>
                   </motion.div>
                 </motion.div>
               </motion.div>
@@ -165,10 +163,10 @@ export function LandingPage() {
                 transition={{ duration: 0.5 }}
                 className="font-display text-3xl sm:text-4xl font-extrabold text-[var(--color-foreground)]"
               >
-                Designed For Trust, Safety &amp; Dignity
+                {t.trustTitle}
               </motion.h2>
               <p className="text-base text-[var(--color-muted-foreground)] leading-relaxed">
-                Three foundational pillars engineered strictly for rural accessibility and consumer protection.
+                {t.trustSubtitle}
               </p>
             </div>
 
@@ -189,13 +187,13 @@ export function LandingPage() {
                   1
                 </div>
                 <h3 className="font-display text-xl font-bold text-[var(--color-foreground)]">
-                  Voice-First Simplicity
+                  {t.pillarVoiceTitle}
                 </h3>
                 <p className="text-sm text-[var(--color-muted-foreground)] leading-relaxed">
-                  Rural beneficiaries simply dial a regular phone number and talk in Hindi, Telugu, Marathi, or English. No smartphone apps, login screens, or reading literacy required.
+                  {t.pillarVoiceBody}
                 </p>
                 <div className="pt-2 text-xs font-bold text-[var(--color-primary)] flex items-center gap-1">
-                  <span>Zero App Download Needed</span>
+                  <span>{t.pillarVoiceBadge}</span>
                   <ArrowRight className="h-3.5 w-3.5" />
                 </div>
               </motion.div>
@@ -216,13 +214,13 @@ export function LandingPage() {
                   2
                 </div>
                 <h3 className="font-display text-xl font-bold text-[var(--color-foreground)]">
-                  Official Guidance &amp; Safety Checks
+                  {t.pillarSafetyTitle}
                 </h3>
                 <p className="text-sm text-[var(--color-muted-foreground)] leading-relaxed">
-                  All guidance comes from official NCFE and RBI financial education materials. Harmful advice, loan shark traps, or guaranteed-return schemes are immediately caught and flagged.
+                  {t.pillarSafetyBody}
                 </p>
                 <div className="pt-2 text-xs font-bold text-amber-800 flex items-center gap-1">
-                  <span>Guaranteed Return Traps Blocked</span>
+                  <span>{t.pillarSafetyBadge}</span>
                   <ArrowRight className="h-3.5 w-3.5" />
                 </div>
               </motion.div>
@@ -243,13 +241,13 @@ export function LandingPage() {
                   3
                 </div>
                 <h3 className="font-display text-xl font-bold text-[var(--color-foreground)]">
-                  Privacy-First Protection
+                  {t.pillarPrivacyTitle}
                 </h3>
                 <p className="text-sm text-[var(--color-muted-foreground)] leading-relaxed">
-                  No bank credentials, logins, or statements are ever accessed. All data is self-reported and caller numbers are strictly masked across all dashboards.
+                  {t.pillarPrivacyBody}
                 </p>
                 <div className="pt-2 text-xs font-bold text-[var(--color-accent)] flex items-center gap-1">
-                  <span>Masked +91 XXXXX67890</span>
+                  <span>{t.pillarPrivacyBadge}</span>
                   <ArrowRight className="h-3.5 w-3.5" />
                 </div>
               </motion.div>

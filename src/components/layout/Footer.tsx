@@ -18,9 +18,6 @@ export function Footer() {
               <span className="font-display text-xl font-bold text-[var(--color-foreground)]">
                 Sahaara
               </span>
-              <span className="rounded-full bg-[var(--color-primary-soft)] px-2 py-0.5 text-xs font-bold text-[var(--color-primary)]">
-                SH-105
-              </span>
             </div>
             <p className="mt-3 text-sm text-[var(--color-muted-foreground)]">
               {t?.tagline ?? "Financial guidance, made simple."}
@@ -58,7 +55,7 @@ export function Footer() {
               </li>
               <li>
                 <Link to="/users/u-101" className="text-[var(--color-muted-foreground)] hover:text-[var(--color-primary)]">
-                  {t?.navProfile ?? "My Profile"} (Lakshmi Devi)
+                  {t?.navProfile ?? "My Profile"}
                 </Link>
               </li>
               <li>
@@ -71,7 +68,7 @@ export function Footer() {
         </div>
 
         <div className="mt-8 border-t border-[var(--color-border)] pt-6 text-center text-xs text-[var(--color-muted-foreground)] flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p>© 2026 Sahaara SH-105 • AI-Powered Financial Empowerment for Rural Women.</p>
+          <p>© 2026 Sahaara • AI-Powered Financial Empowerment for Rural Women.</p>
           <p className="flex items-center gap-1">
             <span>Built with care for rural empowerment</span>
             <Heart className="h-3.5 w-3.5 text-rose-500 fill-rose-500" />

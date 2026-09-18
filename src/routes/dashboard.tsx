@@ -9,12 +9,14 @@ import { Footer } from "@/components/layout/Footer";
 import { type SessionSummary } from "@/types";
 import { LayoutDashboard, RefreshCw } from "lucide-react";
 import { motion } from "framer-motion";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export const Route = createFileRoute("/dashboard")({
   component: DashboardPage,
 });
 
 export function DashboardPage() {
+  const { t } = useLanguage();
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>("s-2401");
   const [loading, setLoading] = useState(true);
@@ -63,11 +65,11 @@ export function DashboardPage() {
                     <LayoutDashboard className="h-6 w-6" />
                   </div>
                   <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-[var(--color-foreground)]">
-                    Voice Call Session Monitor
+                    {t.dashboardTitle}
                   </h1>
                 </div>
                 <p className="text-sm text-[var(--color-muted-foreground)]">
-                  Review recent voice call sessions, caller transcripts, and safety guardrail outcomes for each beneficiary interaction.
+                  {t.dashboardSubtitle}
                 </p>
               </div>
 
@@ -78,7 +80,7 @@ export function DashboardPage() {
                   className="flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-background)] px-4 py-2 text-xs font-bold text-[var(--color-foreground)] shadow-xs transition-all hover:bg-[var(--color-secondary)] hover:border-[var(--color-primary)] disabled:opacity-50"
                 >
                   <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
-                  <span>Refresh Sessions</span>
+                  <span>{t.retry}</span>
                 </button>
               </div>
             </div>

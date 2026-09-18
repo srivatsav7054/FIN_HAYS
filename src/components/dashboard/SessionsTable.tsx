@@ -2,6 +2,7 @@ import { useState } from "react";
 import { type SessionSummary } from "@/types";
 import { ShieldAlert, ShieldCheck, ChevronRight, Clock, MessageCircle, Filter, Search } from "lucide-react";
 import { motion } from "framer-motion";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface SessionsTableProps {
   sessions: SessionSummary[];
@@ -12,7 +13,6 @@ interface SessionsTableProps {
 const langLabels: Record<string, string> = {
   hi: "हिन्दी (Hindi)",
   te: "తెలుగు (Telugu)",
-  mr: "मराठी (Marathi)",
   en: "English",
 };
 
@@ -21,6 +21,7 @@ export function SessionsTable({
   selectedSessionId,
   onSelectSession,
 }: SessionsTableProps) {
+  const { t } = useLanguage();
   const [filter, setFilter] = useState<"all" | "active" | "flagged">("all");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -44,10 +45,10 @@ export function SessionsTable({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--color-border)] pb-4">
         <div>
           <h3 className="font-display text-lg font-extrabold text-[var(--color-foreground)]">
-            Recent Voice &amp; Demo Sessions (सत्र विवरण)
+            {t.sessionsTableTitle}
           </h3>
           <p className="text-xs text-[var(--color-muted-foreground)]">
-            Click any session row to inspect caller conversation and safety checks
+            {t.sessionsTableHint}
           </p>
         </div>
 
@@ -59,7 +60,7 @@ export function SessionsTable({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search session..."
+              placeholder={t.searchSession}
               className="rounded-xl border border-[var(--color-border)] bg-[var(--color-background)] pl-8 pr-3 py-1 text-xs font-semibold text-[var(--color-foreground)] placeholder-[var(--color-muted-foreground)] focus:border-[var(--color-primary)] focus:outline-none w-36 sm:w-44"
             />
           </div>
@@ -75,7 +76,7 @@ export function SessionsTable({
                   : "text-[var(--color-foreground)] hover:bg-[var(--color-secondary)]"
               }`}
             >
-              All ({sessions.length})
+              {t.all} ({sessions.length})
             </button>
             <button
               type="button"
@@ -86,7 +87,7 @@ export function SessionsTable({
                   : "text-[var(--color-foreground)] hover:bg-[var(--color-secondary)]"
               }`}
             >
-              Active
+              {t.active}
             </button>
             <button
               type="button"
@@ -97,7 +98,7 @@ export function SessionsTable({
                   : "text-[var(--color-foreground)] hover:bg-[var(--color-secondary)]"
               }`}
             >
-              Flagged
+              {t.flagged}
             </button>
           </div>
         </div>
@@ -107,13 +108,13 @@ export function SessionsTable({
         <table className="w-full text-left text-sm min-w-[620px]">
           <thead>
             <tr className="border-b border-[var(--color-border)] text-xs font-bold text-[var(--color-muted-foreground)]">
-              <th className="py-3 px-3">Session ID</th>
-              <th className="py-3 px-3">Language</th>
-              <th className="py-3 px-3">Started Time</th>
-              <th className="py-3 px-3">Turns</th>
-              <th className="py-3 px-3">Status</th>
-              <th className="py-3 px-3">Safety Check</th>
-              <th className="py-3 px-3 text-right">Inspect</th>
+              <th className="py-3 px-3">{t.sessionId}</th>
+              <th className="py-3 px-3">{t.languageLabel}</th>
+              <th className="py-3 px-3">{t.time}</th>
+              <th className="py-3 px-3">{t.turns}</th>
+              <th className="py-3 px-3">{t.status}</th>
+              <th className="py-3 px-3">{t.safetyActive}</th>
+              <th className="py-3 px-3 text-right">{t.inspect}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--color-border)]">
@@ -154,7 +155,7 @@ export function SessionsTable({
                   <td className="py-3.5 px-3 text-xs">
                     <span className="flex items-center gap-1">
                       <MessageCircle className="h-3 w-3 text-[var(--color-muted-foreground)]" />
-                      <span>{s.turn_count} turns</span>
+                      <span>{s.turn_count} {t.turnsLabel}</span>
                     </span>
                   </td>
                   <td className="py-3.5 px-3">
@@ -168,19 +169,19 @@ export function SessionsTable({
                       {s.status === "active" && (
                         <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                       )}
-                      <span>{s.status === "active" ? "Active Call" : "Completed"}</span>
+                      <span>{s.status === "active" ? t.activeCall : t.completed}</span>
                     </span>
                   </td>
                   <td className="py-3.5 px-3">
                     {s.flagged ? (
                       <span className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[11px] font-bold text-amber-900">
                         <ShieldAlert className="h-3 w-3 text-amber-600" />
-                        <span>Flagged</span>
+                        <span>{t.flagged}</span>
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700">
                         <ShieldCheck className="h-3.5 w-3.5" />
-                        <span>Clean</span>
+                        <span>{t.clean}</span>
                       </span>
                     )}
                   </td>
@@ -189,7 +190,7 @@ export function SessionsTable({
                       type="button"
                       className="inline-flex items-center gap-1 text-xs font-bold text-[var(--color-primary)] hover:underline"
                     >
-                      <span>View</span>
+                      <span>{t.viewTranscript}</span>
                       <ChevronRight className="h-3.5 w-3.5" />
                     </button>
                   </td>

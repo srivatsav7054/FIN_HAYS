@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { TrendingUp, TrendingDown, PiggyBank, Target, Sparkles, Sprout, Volume2, Info, ArrowUpRight } from "lucide-react";
+import { TrendingUp, TrendingDown, PiggyBank, Target, Volume2, ChartNoAxesCombined } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface FinancialOrbProps {
   className?: string;
@@ -10,38 +11,27 @@ type ActiveNode = "income" | "expenses" | "savings" | "goals" | null;
 
 const NODE_DETAILS = {
   income: {
-    title: "Income (मासिक आय)",
-    description: "Self-reported farming, dairy, and craft inflows. Tracked without bank logins.",
     color: "text-emerald-700",
     bg: "bg-emerald-50 border-emerald-300",
-    badge: "₹18,000 / mo",
   },
   expenses: {
-    title: "Expenses (मासिक खर्च)",
-    description: "Essential household ration, school fees, and agricultural seed costs.",
     color: "text-amber-800",
     bg: "bg-amber-50 border-amber-300",
-    badge: "₹11,500 / mo",
   },
   savings: {
-    title: "Monthly Surplus (उपलब्ध बचत)",
-    description: "Remaining funds available for weekly SHG deposit and emergency safety buffer.",
     color: "text-emerald-800",
     bg: "bg-emerald-100/80 border-emerald-400",
-    badge: "₹6,500 / mo",
   },
   goals: {
-    title: "Savings Goal (बचत लक्ष्य)",
-    description: "Target for daughter's education and farm solar pump over 12 months.",
     color: "text-[var(--color-accent)]",
     bg: "bg-[var(--color-accent-soft)] border-[var(--color-accent)]",
-    badge: "₹30,000 target",
   },
 };
 
 export function FinancialOrb({
   className = "",
 }: FinancialOrbProps) {
+  const { t } = useLanguage();
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [activeNode, setActiveNode] = useState<ActiveNode>(null);
   const [isHovered, setIsHovered] = useState(false);
@@ -73,7 +63,7 @@ export function FinancialOrb({
     return (
       <div className={`surface-card relative flex flex-col items-center justify-center p-8 ${className}`}>
         <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-[var(--color-primary-soft)] text-[var(--color-primary)] mb-3">
-          <Sprout className="h-10 w-10" />
+          <ChartNoAxesCombined className="h-10 w-10" />
         </div>
         <h3 className="font-display text-xl font-bold text-[var(--color-foreground)]">
           Financial Intelligence Core
@@ -112,24 +102,19 @@ export function FinancialOrb({
         }}
       />
 
-      {/* Voice-First AI Audio Wave Indicator Tag */}
-      <div className="absolute top-4 left-4 z-30 flex items-center gap-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-card)]/90 px-3 py-1 text-[11px] font-bold text-[var(--color-foreground)] shadow-xs backdrop-blur-md">
-        <Volume2 className={`h-3.5 w-3.5 text-[var(--color-primary)] ${audioPulse ? "animate-bounce text-[var(--color-accent)]" : ""}`} />
-        <span>Voice-First AI</span>
-        {audioPulse && (
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" />
-        )}
-      </div>
-
-      {/* Interactive Node Instructions Pill */}
-      <div className="absolute top-4 right-4 z-30 flex items-center gap-1 text-[10px] font-semibold text-[var(--color-muted-foreground)]">
-        <Info className="h-3 w-3" />
-        <span>Tap any node</span>
+      <div className="relative z-30 mb-3 flex w-full items-center justify-center">
+        <div className="flex max-w-full items-center gap-2 rounded-full border border-[var(--color-primary)]/20 bg-[var(--color-card)]/92 px-3 py-1.5 text-center text-[11px] font-bold text-[var(--color-foreground)] shadow-soft backdrop-blur-md">
+          <Volume2 className={`h-3.5 w-3.5 shrink-0 text-[var(--color-primary)] ${audioPulse ? "animate-bounce text-[var(--color-accent)]" : ""}`} />
+          <span>{t.orbVoiceLabel}</span>
+          {audioPulse && (
+            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500 animate-ping" />
+          )}
+        </div>
       </div>
 
       {/* Main 3D perspective stage: idle-only motion with refined node focus. */}
       <div
-        className="relative z-20 flex h-72 w-72 sm:h-84 sm:w-84 items-center justify-center"
+        className="relative z-20 flex h-[19rem] w-full max-w-[19rem] items-center justify-center sm:h-84 sm:max-w-84"
         style={{
           perspective: "1200px",
           transformStyle: "preserve-3d",
@@ -233,13 +218,13 @@ export function FinancialOrb({
         >
           <div className="flex flex-col items-center text-center p-2">
             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-tr from-[var(--color-primary)] to-emerald-600 text-white shadow-lift">
-              <Sprout className="h-7 w-7 stroke-[2.2]" />
+              <ChartNoAxesCombined className="h-7 w-7 stroke-[2.2]" />
             </div>
             <span className="mt-1.5 font-display text-[12px] font-black text-[var(--color-foreground)] tracking-tight">
-              Sahaara Core
+              Sahaara AI
             </span>
             <span className="text-[9px] font-extrabold text-[var(--color-primary)] uppercase tracking-widest">
-              SH-105 AI
+              {t.orbCoreLabel}
             </span>
           </div>
         </motion.div>
@@ -257,7 +242,7 @@ export function FinancialOrb({
           }`}
         >
           <TrendingUp className={`h-3.5 w-3.5 ${activeNode === "income" ? "text-white" : "text-[var(--color-primary)]"}`} />
-          <span>Income (आय)</span>
+          <span>{t.orbIncome}</span>
         </motion.button>
 
         {/* Orbital Satellite Node 2: Expenses (Top-Right) */}
@@ -273,7 +258,7 @@ export function FinancialOrb({
           }`}
         >
           <TrendingDown className={`h-3.5 w-3.5 ${activeNode === "expenses" ? "text-white" : "text-amber-600"}`} />
-          <span>Expenses (खर्च)</span>
+          <span>{t.orbExpenses}</span>
         </motion.button>
 
         {/* Orbital Satellite Node 3: Savings (Bottom-Right) */}
@@ -289,7 +274,7 @@ export function FinancialOrb({
           }`}
         >
           <PiggyBank className={`h-3.5 w-3.5 ${activeNode === "savings" ? "text-white" : "text-[var(--color-primary)]"}`} />
-          <span>Savings (बचत)</span>
+          <span>{t.orbSavings}</span>
         </motion.button>
 
         {/* Orbital Satellite Node 4: Goals (Bottom-Left) */}
@@ -305,7 +290,7 @@ export function FinancialOrb({
           }`}
         >
           <Target className={`h-3.5 w-3.5 ${activeNode === "goals" ? "text-white" : "text-[var(--color-accent)]"}`} />
-          <span>Goals (लक्ष्य)</span>
+          <span>{t.orbGoals}</span>
         </motion.button>
 
         {/* 3D Floating Sparks and Particles */}
@@ -315,8 +300,7 @@ export function FinancialOrb({
         <div className="absolute bottom-6 left-14 h-1.5 w-1.5 rounded-full bg-[var(--color-primary)] opacity-75 pointer-events-none" />
       </div>
 
-      {/* Interactive Detail Drawer on Node Click */}
-      <div className="w-full mt-2 min-h-[64px] z-30">
+      <div className="mt-3 min-h-[64px] w-full max-w-xl px-1">
         <AnimatePresence mode="wait">
           {activeNode ? (
             <motion.div
@@ -329,34 +313,17 @@ export function FinancialOrb({
             >
               <div className="flex items-center justify-between">
                 <span className={`text-xs font-extrabold ${NODE_DETAILS[activeNode].color}`}>
-                  {NODE_DETAILS[activeNode].title}
+                  {t.orbDetails[activeNode].title}
                 </span>
                 <span className="rounded-full bg-white/80 px-2 py-0.5 font-mono text-[11px] font-extrabold text-[var(--color-foreground)] shadow-2xs">
-                  {NODE_DETAILS[activeNode].badge}
+                  {t.orbDetails[activeNode].badge}
                 </span>
               </div>
               <p className="mt-1 text-[11px] text-[var(--color-foreground)] leading-snug">
-                {NODE_DETAILS[activeNode].description}
+                {t.orbDetails[activeNode].description}
               </p>
             </motion.div>
-          ) : (
-            <motion.div
-              key="default-guidance"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex items-center justify-between rounded-full bg-[var(--color-card)]/90 px-4 py-2 border border-[var(--color-border)] text-xs text-[var(--color-muted-foreground)]"
-            >
-              <span className="flex items-center gap-1.5 font-medium">
-                <Sparkles className="h-3.5 w-3.5 text-[var(--color-primary)]" />
-                <span>Click any node to explore cash flow details</span>
-              </span>
-              <span className="flex items-center gap-1 text-[10px] font-bold text-[var(--color-primary)]">
-                <span>Interactive 3D</span>
-                <ArrowUpRight className="h-3 w-3" />
-              </span>
-            </motion.div>
-          )}
+          ) : null}
         </AnimatePresence>
       </div>
     </div>

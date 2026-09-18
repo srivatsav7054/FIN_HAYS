@@ -29,20 +29,7 @@ export function AmbientBackground() {
         }}
       />
 
-      {/* Crisp Geometric Dot Matrix Grid with Radial Fade */}
-      <div
-        className="absolute inset-0 opacity-[0.38]"
-        style={{
-          backgroundImage:
-            "radial-gradient(rgba(74, 122, 88, 0.22) 1.5px, transparent 1.5px), radial-gradient(rgba(200, 109, 68, 0.15) 1px, transparent 1px)",
-          backgroundSize: "28px 28px, 56px 56px",
-          backgroundPosition: "0 0, 14px 14px",
-          maskImage: "radial-gradient(ellipse at 50% 35%, black 65%, transparent 100%)",
-          WebkitMaskImage: "radial-gradient(ellipse at 50% 35%, black 65%, transparent 100%)",
-        }}
-      />
-
-      <div className="absolute inset-0 opacity-70 [mask-image:radial-gradient(ellipse_at_center,black_35%,transparent_82%)]">
+      <div className="absolute inset-0 opacity-90 [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_86%)]">
         <span className="space-star space-star-one" />
         <span className="space-star space-star-two" />
         <span className="space-star space-star-three" />
@@ -62,11 +49,11 @@ export function AmbientBackground() {
           scale: [1, 1.12, 0.92, 1],
         }}
         transition={{
-          duration: 22,
+          duration: 17,
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="absolute -top-24 -left-24 h-[440px] w-[440px] rounded-full bg-[var(--color-primary-soft)]/75 blur-[95px]"
+        className="absolute -top-24 -left-24 h-[500px] w-[500px] rounded-full bg-[var(--color-primary-soft)]/85 blur-[95px]"
       />
 
       {/* Floating Glowing Energy Sphere 2: Terracotta Warm Light */}
@@ -77,11 +64,11 @@ export function AmbientBackground() {
           scale: [0.95, 1.15, 0.98, 0.95],
         }}
         transition={{
-          duration: 26,
+          duration: 20,
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="absolute top-1/3 -right-28 h-[480px] w-[480px] rounded-full bg-[var(--color-accent-soft)]/65 blur-[105px]"
+        className="absolute top-1/3 -right-28 h-[540px] w-[540px] rounded-full bg-[var(--color-accent-soft)]/75 blur-[105px]"
       />
 
       {/* Floating Glowing Energy Sphere 3: Golden Amber Glow */}
@@ -92,7 +79,7 @@ export function AmbientBackground() {
           scale: [1, 0.88, 1.12, 1],
         }}
         transition={{
-          duration: 30,
+          duration: 23,
           repeat: Infinity,
           ease: "easeInOut",
         }}

@@ -4,6 +4,7 @@ import { mockTurnSources } from "@/mocks/data";
 import { type SessionHistory } from "@/types";
 import { X, ShieldAlert, BookOpen, Clock, User, Sprout, AlertTriangle } from "lucide-react";
 import { motion } from "framer-motion";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface SessionTranscriptDrawerProps {
   sessionId: string | null;
@@ -14,6 +15,7 @@ export function SessionTranscriptDrawer({
   sessionId,
   onClose,
 }: SessionTranscriptDrawerProps) {
+  const { t } = useLanguage();
   const [history, setHistory] = useState<SessionHistory | null>(null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -61,14 +63,14 @@ export function SessionTranscriptDrawer({
         <div>
           <div className="flex items-center gap-2">
             <h3 className="font-display text-lg font-extrabold text-[var(--color-foreground)]">
-              Call Transcript Inspector
+              {t.transcriptInspector}
             </h3>
             <span className="font-mono rounded-full bg-[var(--color-secondary)] px-2.5 py-0.5 text-xs font-bold text-[var(--color-foreground)]">
               {sessionId}
             </span>
           </div>
           <p className="text-xs text-[var(--color-muted-foreground)]">
-            Full phone conversation with safety checks and verified source references
+            {t.transcriptHint}
           </p>
         </div>
 
@@ -77,14 +79,14 @@ export function SessionTranscriptDrawer({
             type="button"
             onClick={handleCopyTranscript}
             className="flex items-center gap-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-background)] px-2.5 py-1 text-xs font-bold text-[var(--color-foreground)] hover:bg-[var(--color-secondary)] transition-colors"
-            title="Copy entire session transcript"
+            title={t.copy}
           >
-            <span>{copied ? "Copied!" : "Copy"}</span>
+            <span>{copied ? t.copied : t.copy}</span>
           </button>
           <button
             onClick={onClose}
             className="flex h-8 w-8 items-center justify-center rounded-xl text-[var(--color-muted-foreground)] hover:bg-[var(--color-secondary)] hover:text-[var(--color-foreground)]"
-            aria-label="Close transcript"
+            aria-label={t.closeTranscript}
           >
             <X className="h-5 w-5" />
           </button>
@@ -96,13 +98,13 @@ export function SessionTranscriptDrawer({
           <div className="flex flex-col items-center gap-2">
             <div className="h-7 w-7 animate-spin rounded-full border-4 border-[var(--color-primary)] border-t-transparent" />
             <span className="text-xs font-semibold text-[var(--color-muted-foreground)]">
-              Loading session turn history...
+              {t.loadingHistory}
             </span>
           </div>
         </div>
       ) : !history || history.turns.length === 0 ? (
         <div className="py-8 text-center text-sm text-[var(--color-muted-foreground)]">
-          No turns recorded in this session.
+          {t.noTurns}
         </div>
       ) : (
         <div className="space-y-4 max-h-[520px] overflow-y-auto pr-1">
@@ -131,19 +133,19 @@ export function SessionTranscriptDrawer({
                     {isUser ? (
                       <span className="flex items-center gap-1.5 font-bold text-[var(--color-foreground)]">
                         <User className="h-3.5 w-3.5 text-[var(--color-muted-foreground)]" />
-                        <span>Rural Caller (Beneficiary)</span>
+                        <span>{t.ruralCaller}</span>
                       </span>
                     ) : (
                       <span className="flex items-center gap-1.5 font-bold text-[var(--color-primary)]">
                         <Sprout className="h-3.5 w-3.5" />
-                        <span>Sahaara Voice AI</span>
+                        <span>{t.sahaaraVoiceAI}</span>
                       </span>
                     )}
 
                     {turn.flagged && (
                       <span className="flex items-center gap-1 rounded-md bg-amber-200 px-2 py-0.5 text-[10px] font-bold text-amber-900">
                         <ShieldAlert className="h-3 w-3" />
-                        <span>Flagged Turn</span>
+                        <span>{t.flaggedTurn}</span>
                       </span>
                     )}
                   </div>
@@ -166,7 +168,7 @@ export function SessionTranscriptDrawer({
                       <div className="flex items-start gap-1.5 rounded-lg bg-amber-100/70 p-2 text-amber-900 mb-2">
                         <AlertTriangle className="h-4 w-4 text-amber-700 shrink-0 mt-0.5" />
                         <span className="text-[11px] leading-tight">
-                          <strong>Safety Action:</strong> High-risk query regarding unregulated doubling/fixed returns intercepted. Advisory boundaries reinforced.
+                          <strong>{t.safetyAction}:</strong> {t.safetyActionText}
                         </span>
                       </div>
                     ) : null}
@@ -174,7 +176,7 @@ export function SessionTranscriptDrawer({
                     <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-[var(--color-muted-foreground)]">
                       <span className="flex items-center gap-1 text-[var(--color-primary)]">
                         <BookOpen className="h-3 w-3" />
-                        <span>Official References:</span>
+                        <span>{t.officialReferences}:</span>
                       </span>
                       {sources.map((s, i) => (
                         <span

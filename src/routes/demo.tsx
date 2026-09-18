@@ -148,7 +148,7 @@ export function DemoPage() {
                   </span>
                 </div>
                 <p className="text-sm text-[var(--color-muted-foreground)] leading-relaxed">
-                  Ask Sahaara financial questions in Hindi, Telugu, Marathi, or English. All guidance is grounded in official NCFE &amp; RBI education materials, with safety guardrails to block harmful schemes.
+                  Ask Sahaara financial questions in Hindi, Telugu, or English. All guidance is grounded in official financial education materials, with safety guardrails to block harmful schemes.
                 </p>
               </div>
 
@@ -179,7 +179,7 @@ export function DemoPage() {
               </div>
               <span>•</span>
               <div className="flex items-center gap-2">
-                <span>Multilingual: हिन्दी, తెలుగు, मराठी, English</span>
+                <span>Multilingual: हिन्दी, తెలుగు, English</span>
               </div>
             </div>
           </motion.div>

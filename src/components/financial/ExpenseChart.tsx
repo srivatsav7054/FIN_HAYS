@@ -9,6 +9,7 @@ import {
 } from "recharts";
 import { motion } from "framer-motion";
 import { type Transaction } from "@/types";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface ExpenseChartProps {
   transactions: Transaction[];
@@ -24,6 +25,7 @@ const COLORS = [
 ];
 
 export function ExpenseChart({ transactions }: ExpenseChartProps) {
+  const { t } = useLanguage();
   const chartData = useMemo(() => {
     const expenseOnly = transactions.filter((t) => t.type === "expense");
     const totals: Record<string, number> = {};
@@ -33,7 +35,7 @@ export function ExpenseChart({ transactions }: ExpenseChartProps) {
     });
 
     return Object.entries(totals).map(([name, value]) => ({
-      name,
+      name: t.categoryNames[name] ?? name,
       value,
     }));
   }, [transactions]);
@@ -46,7 +48,7 @@ export function ExpenseChart({ transactions }: ExpenseChartProps) {
   if (chartData.length === 0) {
     return (
       <div className="surface-card flex h-64 items-center justify-center p-6 text-sm text-[var(--color-muted-foreground)]">
-        No expense transactions recorded yet.
+        {t.noExpenseTransactions}
       </div>
     );
   }
@@ -62,14 +64,14 @@ export function ExpenseChart({ transactions }: ExpenseChartProps) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[var(--color-border)] pb-3">
         <div>
           <h4 className="font-display text-lg font-bold text-[var(--color-foreground)]">
-            Expense Breakdown by Category (खर्च विवरण)
+            {t.expenseBreakdownTitle}
           </h4>
           <p className="text-xs text-[var(--color-muted-foreground)]">
-            Visual breakdown of self-reported household & farming outflows
+            {t.expenseBreakdownSubtitle}
           </p>
         </div>
         <div className="font-mono text-sm font-bold text-[var(--color-primary)]">
-          Total: ₹{totalExpense.toLocaleString("en-IN")}
+          {t.total}: ₹{totalExpense.toLocaleString("en-IN")}
         </div>
       </div>
 
@@ -98,7 +100,7 @@ export function ExpenseChart({ transactions }: ExpenseChartProps) {
             <Tooltip
               formatter={(value: any) => [
                 `₹${Number(value || 0).toLocaleString("en-IN")}`,
-                "Amount",
+                t.amount,
               ]}
               contentStyle={{
                 backgroundColor: "var(--color-card)",

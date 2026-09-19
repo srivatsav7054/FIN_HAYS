@@ -36,9 +36,10 @@ if sys.platform == "win32":
         pass
 
 import miniaudio
+import webrtcvad
 
 from app.telephony.stt import transcribe_audio
-from app.telephony.tts import synthesize_speech_async
+from app.telephony.tts import synthesize_speech_async, VOICE_MAP, DEFAULT_VOICE
 from app.services.orchestrator import run_orchestrator
 
 logger = logging.getLogger(__name__)
@@ -55,23 +56,26 @@ SAMPLE_WIDTH = 2         # 16-bit = 2 bytes
 CHANNELS = 1             # mono
 FRAME_SIZE = 320         # 20ms of audio at 8kHz * 2 bytes = 320 bytes
 
-# VAD parameters
-# Mean absolute energy threshold (16-bit signed PCM, range 0..32767)
-# Typical quiet room / mic hiss is 20-250; spoken voice is 800-8000+
+# VAD parameters using webrtcvad
+VAD_AGGRESSIVENESS = 2
+
+# Fallback energy threshold
 SILENCE_THRESHOLD = 300
-SILENCE_DURATION_BYTES = 12800  # 0.8s of silence to mark end of utterance
-MIN_SPEECH_BYTES = 3200         # 0.2s of speech before we process
+
+# Silence wait: 1.0s to mark end of utterance
+SILENCE_DURATION_BYTES = 16000  # 50 frames of silence (1.0s)
+MIN_SPEECH_BYTES = 9600         # 30 frames of speech (0.6s)
 MAX_SPEECH_BYTES = 160000       # 10.0s max utterance safeguard
 
 # Echo-cancellation: how long after TTS finishes to start listening again
-POST_SPEAK_GATE_SEC = 0.3
+POST_SPEAK_GATE_SEC = 0.2
 
 # In-memory session store for AudioSocket calls
 _audiosocket_sessions: dict[str, list[dict]] = {}
 
 # Pre-cached greeting PCM bytes
 _cached_greeting_pcm: bytes = b""
-GREETING_TEXT = "नमस्ते! धन सखी में आपका स्वागत है। मैं आपकी क्या सहायता कर सकती हूँ?"
+GREETING_TEXT = "नमस्ते, धन सखी में स्वागत है। कहिए, क्या मदद करूँ?"
 
 # Ensure latency log exists
 os.makedirs("logs", exist_ok=True)
@@ -79,6 +83,7 @@ LATENCY_CSV = "logs/latency.csv"
 if not os.path.exists(LATENCY_CSV):
     with open(LATENCY_CSV, "w", encoding="utf-8") as f:
         f.write("call_uuid,t0_timestamp,stt_ms,llm_ms,tts_ms,first_frame_ms,total_ms\n")
+
 
 
 def _get_chunk_energy(audio_chunk: bytes) -> int:
@@ -105,6 +110,26 @@ def _pcm_to_wav(pcm_data: bytes, sample_rate: int = SAMPLE_RATE) -> bytes:
         wf.setframerate(sample_rate)
         wf.writeframes(pcm_data)
     return buf.getvalue()
+
+
+def _split_into_sentences(text: str) -> list[str]:
+    """Split response text into individual sentences for Hindi and English."""
+    import re
+    # Split on periods, exclamation marks, question marks, newlines, and Hindi danda (।)
+    parts = re.split(r'([.!?\n|।]+)', text)
+    sentences = []
+    current = ""
+    for p in parts:
+        current += p
+        if re.search(r'[.!?\n|।]', p):
+            s = current.strip()
+            if s:
+                sentences.append(s)
+            current = ""
+    if current.strip():
+        sentences.append(current.strip())
+    return sentences if sentences else [text]
+
 
 
 def _mp3_to_slin16_8k(mp3_bytes: bytes) -> bytes:
@@ -229,7 +254,7 @@ async def _process_user_utterance(
     out_queue: asyncio.Queue[bytes],
     state: dict,
 ) -> str:
-    """Run STT -> LLM -> TTS pipeline and queue synthesized audio."""
+    """Run STT -> LLM -> Sentence-by-Sentence Streaming TTS pipeline."""
     t0 = time.time()
     try:
         logger.info(
@@ -242,10 +267,14 @@ async def _process_user_utterance(
         # ── 1. STT ──
         wav_data = _pcm_to_wav(speech_data)
         stt_result = await asyncio.to_thread(
-            transcribe_audio, wav_data, filename="call.wav"
+            transcribe_audio,
+            wav_data,
+            filename="call.wav",
+            language=None,  # Let Whisper auto-detect
+            current_session_lang=language if language != "auto" else "en",
         )
         transcribed_text = stt_result.get("text", "").strip()
-        detected_lang = stt_result.get("language", language)
+        detected_lang = stt_result.get("language", language if language != "auto" else "en")
         if detected_lang and detected_lang != "auto":
             language = detected_lang
 
@@ -253,14 +282,20 @@ async def _process_user_utterance(
             logger.warning("AudioSocket: STT produced empty text for %s", call_uuid)
             return language
 
-        logger.info("AudioSocket STT [%s]: '%s' (lang=%s)", call_uuid, transcribed_text, language)
+        # Filter out repetitive Whisper hallucinations on residual noise/clicks
+        words = transcribed_text.split()
+        if len(words) >= 3 and len(set(words)) == 1:
+            logger.warning("AudioSocket [%s]: discarded repetitive Whisper hallucination: '%s'", call_uuid[:8], transcribed_text)
+            return language
+
+        logger.info("AudioSocket STT [%s]: '%s' (detected_lang=%s)", call_uuid, transcribed_text, language)
         t1 = time.time()
 
         # ── 2. LLM Orchestrator ──
         result = await asyncio.to_thread(
             run_orchestrator,
             text=transcribed_text,
-            language=language,
+            language=language if language != "auto" else "en",
             history=session_history,
         )
         response_text = result.get("response_text", "").strip()
@@ -270,30 +305,60 @@ async def _process_user_utterance(
         session_history.append({"role": "assistant", "text": response_text})
         t2 = time.time()
 
-        # ── 3. TTS ──
-        tts_lang = language if language != "auto" else "hi"
-        mp3_bytes = await synthesize_speech_async(response_text, language=tts_lang)
-        pcm_out = _mp3_to_slin16_8k(mp3_bytes)
-        t3 = time.time()
+        # ── 3. TTS — Simple Hindi/English voice selection ──
+        has_hindi = any(0x0900 <= ord(ch) <= 0x097F for ch in response_text)
+        final_tts_lang = "hi" if has_hindi else "en"
+        tts_voice = VOICE_MAP.get(final_tts_lang, DEFAULT_VOICE)
 
-        # ── 4. Enqueue Audio for Streaming ──
-        _enqueue_pcm(out_queue, pcm_out, state)
+        logger.info(
+            "Language Routing [%s]: detected_input=%s -> tts_lang=%s, voice=%s",
+            call_uuid[:8],
+            detected_lang,
+            final_tts_lang,
+            tts_voice,
+        )
+
+        sentences = _split_into_sentences(response_text)
+        logger.info("AudioSocket TTS streaming [%s]: synthesizing %d sentences", call_uuid[:8], len(sentences))
+
+        first_frame_ms = 0.0
+        total_enqueued = 0
+
+        for idx, sentence in enumerate(sentences):
+            if not sentence.strip():
+                continue
+            s_mp3 = await synthesize_speech_async(sentence, language=final_tts_lang)
+            s_pcm = _mp3_to_slin16_8k(s_mp3)
+            _enqueue_pcm(out_queue, s_pcm, state)
+            total_enqueued += len(s_pcm) // FRAME_SIZE
+
+            # Measure latency to first audio frame sent to caller
+            if idx == 0:
+                first_frame_ms = (time.time() - t0) * 1000
+                logger.info(
+                    "AudioSocket [%s]: First sentence enqueued in %.0fms (streaming started!)",
+                    call_uuid[:8],
+                    first_frame_ms,
+                )
+
+        t3 = time.time()
 
         stt_ms = (t1 - t0) * 1000
         llm_ms = (t2 - t1) * 1000
         tts_ms = (t3 - t2) * 1000
         total_ms = (t3 - t0) * 1000
         logger.info(
-            "Latency for %s: STT=%.0fms, LLM=%.0fms, TTS=%.0fms, total=%.0fms",
-            call_uuid,
+            "Latency for %s: STT=%.0fms, LLM=%.0fms, TTS=%.0fms, first_frame=%.0fms, total=%.0fms",
+            call_uuid[:8],
             stt_ms,
             llm_ms,
             tts_ms,
+            first_frame_ms,
             total_ms,
         )
         with open(LATENCY_CSV, "a", encoding="utf-8") as f:
             f.write(
-                f"{call_uuid},{t0},{stt_ms:.0f},{llm_ms:.0f},{tts_ms:.0f},0,{total_ms:.0f}\n"
+                f"{call_uuid},{t0},{stt_ms:.0f},{llm_ms:.0f},{tts_ms:.0f},{first_frame_ms:.0f},{total_ms:.0f}\n"
             )
 
     except Exception as e:
@@ -317,7 +382,7 @@ async def _handle_audiosocket_connection(
     silence_counter = 0
     speech_detected = False
     session_history: list[dict] = []
-    language = "hi"  # Default Hindi
+    language = "auto"  # Auto-detect language on first turn (Hindi or English)
 
     out_queue: asyncio.Queue[bytes] = asyncio.Queue()
     stop_event = asyncio.Event()
@@ -339,6 +404,9 @@ async def _handle_audiosocket_connection(
     last_log_t = time.time()
     frames_received = 0
     frames_discarded = 0
+
+    call_start_mono = time.monotonic()
+    vad = webrtcvad.Vad(VAD_AGGRESSIVENESS)
 
     try:
         while True:
@@ -383,7 +451,6 @@ async def _handle_audiosocket_connection(
                 now = time.time()
 
                 # ── Echo gate: skip mic audio while TTS is playing or processing ──
-                # This prevents the AI from hearing its own voice as input.
                 tts_playing = state["is_tts_playing"]
                 is_processing = state["is_processing"]
                 tts_just_finished = (
@@ -392,13 +459,13 @@ async def _handle_audiosocket_connection(
 
                 should_gate = tts_playing or is_processing or tts_just_finished
 
-                # Periodic debug log every 2 seconds — ALWAYS log, even when gated
+                # Periodic debug log every 2 seconds
                 if now - last_log_t > 2.0:
                     last_log_t = now
                     energy = _get_chunk_energy(payload)
                     logger.info(
                         "AudioSocket [%s]: energy=%d gated=%s (tts=%s proc=%s post=%s) "
-                        "recv=%d disc=%d buf=%d speech=%s",
+                        "recv=%d disc=%d buf=%d speech=%s call_sec=%.1f",
                         call_uuid[:8],
                         energy,
                         should_gate,
@@ -409,6 +476,7 @@ async def _handle_audiosocket_connection(
                         frames_discarded,
                         len(audio_buffer),
                         speech_detected,
+                        time.monotonic() - call_start_mono,
                     )
 
                 if should_gate:
@@ -418,9 +486,14 @@ async def _handle_audiosocket_connection(
                     speech_detected = False
                     continue
 
-                energy = _get_chunk_energy(payload)
+                # ── webrtcvad speech detection on 20ms 8kHz mono frame ──
+                try:
+                    is_voice_frame = vad.is_speech(payload, SAMPLE_RATE)
+                except Exception:
+                    # Fallback to energy threshold if frame structure is non-standard
+                    is_voice_frame = _get_chunk_energy(payload) >= 300
 
-                if energy >= SILENCE_THRESHOLD:
+                if is_voice_frame:
                     speech_detected = True
                     silence_counter = 0
                     audio_buffer.extend(payload)
@@ -446,7 +519,7 @@ async def _handle_audiosocket_connection(
                     speech_detected = False
                     state["is_processing"] = True
 
-                    logger.info("AudioSocket: utterance captured (%d bytes / %.1fs), processing...",
+                    logger.info("AudioSocket: utterance captured (%d bytes / %.1fs, VAD triggered), processing...",
                                 len(speech_data), len(speech_data) / 16000.0)
 
                     # Wait for any previous processing to finish
@@ -491,7 +564,10 @@ async def _handle_audiosocket_connection(
         stop_event.set()
         streamer_task.cancel()
         if processing_task is not None and not processing_task.done():
-            processing_task.cancel()
+            try:
+                await asyncio.wait_for(asyncio.shield(processing_task), timeout=5.0)
+            except Exception:
+                processing_task.cancel()
         try:
             writer.close()
             await writer.wait_closed()

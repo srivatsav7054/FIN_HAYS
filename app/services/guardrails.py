@@ -21,9 +21,9 @@ UNSAFE_PATTERNS = [
     r"(?i)\b(take this medicine|sue them|divorce|cure for)\b"
 ]
 
-def check_guardrails(draft_response: str) -> str:
+def check_guardrails(draft_response: str, is_detailed_request: bool = False) -> str:
     """
-    Check the drafted response for safety and policy violations.
+    Check the drafted response for safety, policy violations, and excessive length.
     Returns JSON with flagged status and reasons.
     """
     reasons = []
@@ -33,6 +33,11 @@ def check_guardrails(draft_response: str) -> str:
         if match:
             reasons.append(f"Matched unsafe pattern: {match.group(0)}")
             
+    # Check length for voice brevity: cap at ~40 words for simple questions
+    words = draft_response.strip().split()
+    if not is_detailed_request and len(words) > 50:
+        reasons.append(f"Response too verbose for voice ({len(words)} words > 50 words)")
+
     is_flagged = len(reasons) > 0
     
     if is_flagged:
@@ -43,3 +48,4 @@ def check_guardrails(draft_response: str) -> str:
         "reasons": reasons,
         "safe": not is_flagged
     })
+

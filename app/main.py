@@ -22,11 +22,19 @@ from app.models.database import init_db
 from app.rag.retriever import seed_database
 from app.routers import agent, user, transactions, session, voice
 from app.telephony.audiosocket import start_audiosocket_server
+from app.config import reset_settings
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup / shutdown lifecycle."""
+    # Reset cached settings and API clients so fresh .env values are always picked up
+    reset_settings()
+    from app.services.orchestrator import reset_client as reset_llm_client
+    from app.telephony.stt import reset_client as reset_stt_client
+    reset_llm_client()
+    reset_stt_client()
+
     # Create tables on startup
     init_db()
     print("[OK] Database initialized (SQLite)")

@@ -108,9 +108,10 @@ def voice_pipeline_endpoint(
         )
 
     # 2. STT
-    stt_result = transcribe_audio(audio_bytes, language=request.language or None)
+    req_lang = request.language if (request.language and request.language != "auto") else None
+    stt_result = transcribe_audio(audio_bytes, language=req_lang, current_session_lang=req_lang or "en")
     transcribed_text = stt_result.get("text", "")
-    detected_language = stt_result.get("language", request.language)
+    detected_language = stt_result.get("language", req_lang or "en")
 
     if not transcribed_text.strip():
         logger.warning("STT returned empty transcription")
@@ -165,8 +166,34 @@ def voice_pipeline_endpoint(
     history.append({"role": "user", "text": transcribed_text})
     history.append({"role": "assistant", "text": response_text})
 
-    # 6. TTS
-    tts_lang = detected_language if detected_language != "auto" else request.language
+    # 6. TTS - harmonize with actual response text script
+    tts_lang = detected_language if (detected_language and detected_language != "auto") else (request.language or "hi")
+    from app.telephony.tts import VOICE_MAP, DEFAULT_VOICE
+
+    for ch in response_text:
+        code = ord(ch)
+        if 0x0C00 <= code <= 0x0C7F:
+            tts_lang = "te"
+            break
+        elif 0x0900 <= code <= 0x097F:
+            tts_lang = "mr" if detected_language == "mr" else "hi"
+            break
+        elif 0x0B80 <= code <= 0x0BFF:
+            tts_lang = "ta"
+            break
+        elif 0x0C80 <= code <= 0x0CFF:
+            tts_lang = "kn"
+            break
+
+    tts_voice = VOICE_MAP.get(tts_lang, DEFAULT_VOICE)
+    logger.info(
+        "Voice Pipeline [%s]: detected_input_lang=%s -> llm_lang=%s -> tts_voice=%s (lang=%s)",
+        request.session_id[:8],
+        detected_language,
+        detected_language,
+        tts_voice,
+        tts_lang,
+    )
     audio_out = synthesize_speech(response_text, language=tts_lang)
     audio_b64 = base64.b64encode(audio_out).decode("utf-8")
 

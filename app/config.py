@@ -26,3 +26,8 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
+
+
+def reset_settings() -> None:
+    """Clear the cached settings so .env changes are picked up on next access."""
+    get_settings.cache_clear()

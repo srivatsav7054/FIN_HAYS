@@ -1,14 +1,16 @@
 """Orchestrator — single LLM call with tool-calling via Groq API.
 
-Uses the OpenAI-compatible Groq endpoint with llama-3.3-70b-versatile.
-Three tools are registered (rag_search, calculate, guardrail_check);
-Step 2 uses mocked/canned tool implementations, Steps 3-4 wire in real ones.
+Uses the OpenAI-compatible Groq endpoint.
+Two tools are registered (rag_search, calculate).
+Focused on Hindi and English financial guidance only.
 """
 
 from __future__ import annotations
 
 import json
 import logging
+import re
+import time
 from typing import Any
 
 from openai import OpenAI
@@ -20,8 +22,8 @@ from app.services.guardrails import check_guardrails
 
 logger = logging.getLogger(__name__)
 
-# Model to use — configurable so we can switch if Groq changes availability
-LLM_MODEL = "openai/gpt-oss-120b"
+# Primary model — fast and multilingual on Groq
+LLM_MODEL = "qwen/qwen3.8-27b"
 
 # ── Groq client (OpenAI-compatible) ─────────────────────────────────────
 
@@ -40,40 +42,78 @@ def _get_client() -> OpenAI:
     return _client
 
 
+def reset_client() -> None:
+    """Reset the cached OpenAI client so a new API key is picked up."""
+    global _client
+    _client = None
+
+
+def _strip_thinking(text: str) -> str:
+    """Remove Qwen-style <think>...</think> reasoning blocks from model output."""
+    return re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
+
+
 # ── System prompt ────────────────────────────────────────────────────────
 
 SYSTEM_PROMPT = """\
 You are "Dhan Sakhi" (धन सखी), a warm, patient, and trustworthy AI \
-financial literacy assistant designed for rural women and individuals \
-with limited financial or technical knowledge in India.
+financial literacy guide speaking on a real-time phone call \
+with rural women and low-literacy citizens across India.
 
-CORE RULES:
-1. You speak simply and clearly. Avoid jargon. Use everyday examples \
-   (farming, household expenses, small business) that your users relate to.
-2. You are multilingual. Respond in the SAME language the user speaks. \
-   Supported: Hindi, Telugu, Marathi, English.
-3. You NEVER make personalized financial promises ("you WILL save ₹X"). \
-   Frame everything as general education and guidance.
-4. You NEVER do arithmetic yourself. Always use the "calculate" tool for \
-   any math — budgets, savings projections, interest estimates, etc.
-5. You ground your answers in your knowledge base. Use the "rag_search" \
-   tool to retrieve relevant financial literacy content before answering.
-6. Before sending any response, run it through the "guardrail_check" tool \
-   to verify it doesn't contain unverifiable claims or advice-like language.
-7. If you don't know something or the guardrail flags your response, say: \
-   "I'm not fully sure about that — let me suggest you speak with a local \
-   financial literacy counselor or call the PMJDY helpline."
-8. Always be encouraging and supportive. Many of your users are learning \
-   about money management for the first time.
-9. When a user provides income/expense numbers, help them think about \
-   budgeting and saving step by step using the calculate tool.
-10. Cite which knowledge-base sources you used, so answers are traceable.
+CRITICAL VOICE & CONVERSATIONAL RULES (HARD BOUNDARIES):
+1. BREVITY: Keep your answer to 2-3 SHORT sentences (under 40 words total) \
+   unless the caller explicitly asks for more detail ("tell me more", "explain further", "विस्तार से बताओ").
+2. DIRECT ANSWER FIRST: Answer the question directly in the very first sentence. \
+   Never repeat or paraphrase the caller's question. No polite filler or preamble \
+   such as "That is a good question" or "Sure, I can help you with that".
+3. STRICT RAG GROUNDING BOUNDARY (NO SPECULATION / NO UNGROUNDED GUESSES):
+   - Always call "rag_search" to find verified facts before answering knowledge questions.
+   - Ground your answer strictly in the facts returned by "rag_search".
+   - If the caller asks about a topic that has NO verified information in the knowledge base, \
+     you MUST NEVER invent, guess, or pull from unverified general knowledge.
+   - In that case, use this EXACT plain, respectful refusal in the caller's language:
+     • Hindi: "माफ़ कीजिए, मुझे इसके बारे में पक्की जानकारी नहीं है। सही मदद के लिए आप अपने पास के बैंक मित्र या बैंक जाकर पूछ सकते हैं।"
+     • English: "I am sorry, I do not have clear information on that. Please speak with your local Bank Mitra or visit your nearby bank branch to get help."
+4. LOW-LITERACY SIMPLIFICATION & RELATABLE COMPARISONS:
+   - Use simple, everyday spoken words. Strictly avoid financial jargon.
+   - Use relatable rural comparisons:
+     • Compare regular saving to setting aside a fistful of grain daily (रोज मुट्ठी भर अनाज).
+     • Compare bank interest to a seed growing into a crop with water.
+     • Compare a bank account to a safe locker in the village post office.
+5. STRICT LANGUAGE MATCHING:
+   - Always respond in the EXACT language of the user: Hindi or English.
+   - If user speaks Hindi, reply ONLY in Hindi (Devanagari script).
+   - If user speaks English, reply ONLY in English.
+6. NO MENTAL MATH & NO FALSE GUARANTEES:
+   - Never guarantee outcomes or speculate on earnings.
+   - Always call the "calculate" tool for any arithmetic. Never calculate numbers in your head.
+7. PHONETIC RESILIENCE & NEVER REJECT FINANCIAL QUESTIONS:
+   - Spoken telephony audio often has transcription errors.
+   - If the caller mentions money, saving, bank, loan, rupees, or accounts even with imperfect words, \
+     ALWAYS answer the financial question helpfully using verified knowledge!
+   - NEVER trigger the "समझ नहीं आई" refusal if there is ANY financial intent or mention of money.
 
-You have access to these tools:
-- rag_search(query): Search the financial literacy knowledge base
-- calculate(expression): Do deterministic math (budget, savings, interest)
+FEW-SHOT EXAMPLES:
 
-Always use rag_search first for knowledge questions, and calculate for math.
+Example 1 (Hindi - PMJDY):
+User: जन धन खाता कैसे खोलें?
+Dhan Sakhi: जन धन खाता किसी भी बैंक में बिना किसी पैसे के खुलता है। बस आधार कार्ड और एक फोटो लेकर जाएं, इसमें 2 लाख का मुफ्त दुर्घटना बीमा भी मिलता है।
+
+Example 2 (English - FD):
+User: What is a fixed deposit?
+Dhan Sakhi: A fixed deposit lets you keep money in the bank for a set time and earn higher interest than a savings account. Your money stays completely safe, like grain stored in a locked room.
+
+Example 3 (Hindi - noisy input):
+User: प्राश शौर रुपए क्या करना?
+Dhan Sakhi: अगर आपके पास पैसे हैं, तो आप इसे बचत खाते या डाकघर में जमा कर सकते हैं। वहाँ पैसा सुरक्षित रहेगा और ब्याज भी मिलेगा।
+
+Example 4 (English - Out of scope):
+User: Should I invest in Bitcoin?
+Dhan Sakhi: I am sorry, I do not have clear information on that. Please speak with your local Bank Mitra or visit your nearby bank branch to get help.
+
+Example 5 (Hindi - Unintelligible):
+User: अ ब स
+Dhan Sakhi: नमस्ते, मुझे आपकी बात साफ समझ नहीं आई। कृपया दोबारा कहें।
 """
 
 # ── Tool definitions (OpenAI function-calling format) ────────────────────
@@ -168,19 +208,34 @@ def run_orchestrator(
     client = _get_client()
 
     # ── Build message history ────────────────────────────────────────
-    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+    lang_name = "Hindi" if language == "hi" else "English"
+    script_instruction = "Devanagari Hindi script (हिन्दी)" if language == "hi" else "clear simple English"
 
-    # Add conversation history (prior turns for session continuity)
-    for turn in history[-20:]:  # Keep last 20 turns to stay within context
+    dynamic_sys_prompt = (
+        f"{SYSTEM_PROMPT}\n\n"
+        f"═══════════════════════════════════════════════════════════════\n"
+        f"CRITICAL LANGUAGE & SCRIPT ENFORCEMENT FOR THIS TURN:\n"
+        f"User is speaking: {lang_name.upper()} (code: '{language}').\n"
+        f"1. You MUST formulate your entire response in {lang_name.upper()} ONLY.\n"
+        f"2. You MUST write in {script_instruction}.\n"
+        f"3. Do NOT answer in Hindi if user spoke English, and vice versa.\n"
+        f"═══════════════════════════════════════════════════════════════"
+    )
+
+    messages = [{"role": "system", "content": dynamic_sys_prompt}]
+
+    # Add conversation history (last 6 turns for context)
+    for turn in history[-6:]:
+        turn_text = turn.get("text", "")
         messages.append({
             "role": turn["role"],
-            "content": turn["text"],
+            "content": turn_text,
         })
 
     # Add current user message
     messages.append({
         "role": "user",
-        "content": f"[Language: {language}] {text}",
+        "content": text,
     })
 
     # ── LLM call with tool-calling loop ──────────────────────────────
@@ -189,22 +244,42 @@ def run_orchestrator(
     max_tool_rounds = 5  # Safety limit to prevent infinite loops
 
     for _round in range(max_tool_rounds):
-        try:
-            response = client.chat.completions.create(
-                model=LLM_MODEL,
-                messages=messages,
-                tools=TOOLS,
-                tool_choice="auto",
-                temperature=0.3,
-                max_tokens=1024,
-            )
-        except Exception as e:
-            logger.error("Groq API error: %s", e)
+        # Retry with exponential backoff for Groq rate limits (429)
+        last_error = None
+        for _retry in range(4):  # up to 3 retries (4 attempts total)
+            try:
+                response = client.chat.completions.create(
+                    model=LLM_MODEL,
+                    messages=messages,
+                    tools=TOOLS,
+                    tool_choice="auto",
+                    temperature=0.3,
+                    max_tokens=300,
+                )
+                last_error = None
+                break  # success
+            except Exception as e:
+                last_error = e
+                err_str = str(e)
+                # Retry on rate limit (429) or server errors (5xx)
+                if "429" in err_str or "rate_limit" in err_str.lower() or "502" in err_str or "503" in err_str:
+                    wait = (2 ** _retry) + 0.5  # 1.5s, 2.5s, 4.5s, 8.5s
+                    logger.warning("Groq rate-limited (attempt %d/4), retrying in %.1fs: %s", _retry + 1, wait, err_str[:100])
+                    time.sleep(wait)
+                else:
+                    # Non-retryable error (auth, bad request, etc.)
+                    logger.error("Groq API error (non-retryable): %s", e)
+                    break
+
+        if last_error is not None:
+            logger.error("Groq API failed after retries: %s", last_error)
+            # Return language-appropriate error message
+            if language == "hi":
+                error_text = "माफ़ कीजिए, अभी कुछ तकनीकी दिक्कत है। कृपया थोड़ी देर बाद दोबारा कॉल करें।"
+            else:
+                error_text = "I am sorry, there is a technical issue right now. Please try calling again shortly."
             return {
-                "response_text": (
-                    "I'm sorry, I'm having trouble connecting right now. "
-                    "Please try again in a moment."
-                ),
+                "response_text": error_text,
                 "sources": [],
                 "flagged": False,
             }
@@ -222,7 +297,13 @@ def run_orchestrator(
 
         # If no tool calls, we have the final response
         if not message.tool_calls:
-            response_text = message.content or ""
+            raw_content = message.content or ""
+            # Strip Qwen thinking tokens FIRST before anything else
+            response_text = _strip_thinking(raw_content)
+            if not response_text:
+                # Edge case: model produced only thinking tokens with no actual answer
+                response_text = raw_content
+            logger.info("LLM raw length=%d, after strip_thinking length=%d", len(raw_content), len(response_text))
             break
 
         # Process tool calls
@@ -245,15 +326,6 @@ def run_orchestrator(
                 except json.JSONDecodeError:
                     pass
 
-            # Track guardrail flags
-            if tool_name == "guardrail_check":
-                try:
-                    parsed = json.loads(tool_result)
-                    if parsed.get("flagged", False):
-                        flagged = True
-                except json.JSONDecodeError:
-                    pass
-
             messages.append({
                 "role": "tool",
                 "tool_call_id": tool_call.id,
@@ -261,21 +333,44 @@ def run_orchestrator(
             })
     else:
         # Exhausted tool rounds — use last message content
-        response_text = message.content or "I need a moment to think about that."
+        raw_content = message.content or ""
+        response_text = _strip_thinking(raw_content)
+        if not response_text:
+            response_text = raw_content
+        if not response_text:
+            if language == "hi":
+                response_text = "माफ़ कीजिए, कृपया दोबारा कहें।"
+            else:
+                response_text = "I am sorry, could you please say that again?"
+
+    # ── Clean formatting artifacts ────────────────────────────────────
+    # Strip markdown headers, bold prefixes, asterisks, quotes
+    response_text = re.sub(r"^\s*(\*\*[^*]+\*\*|Transcript:|Response:)\s*", "", response_text, flags=re.IGNORECASE).strip()
+    response_text = re.sub(r"[*#_`]", "", response_text).strip()
+    # Strip any remaining XML-like tags (e.g. leftover <think> fragments)
+    response_text = re.sub(r"<[^>]+>", "", response_text).strip()
 
     # Safety: enforce guardrail on final output
-    guardrail_result_str = check_guardrails(response_text)
+    is_detailed = any(w in text.lower() for w in ["tell me more", "explain further", "detail", "विस्तार", "more details"])
+    guardrail_result_str = check_guardrails(response_text, is_detailed_request=is_detailed)
     guardrail_result = json.loads(guardrail_result_str)
     
     if guardrail_result.get("flagged"):
         flagged = True
         logger.warning(f"Final response blocked by guardrails: {guardrail_result.get('reasons')}")
-        response_text = (
-            "I'm sorry, I cannot fulfill that request as it violates our "
-            "safety policies (e.g., sharing sensitive information, unverified "
-            "schemes, or medical/legal advice). Please speak with a verified "
-            "financial counselor."
-        )
+        has_unsafe_pattern = any("Matched unsafe pattern" in r for r in guardrail_result.get("reasons", []))
+        if has_unsafe_pattern:
+            if language == "hi":
+                response_text = "माफ़ कीजिए, मैं इस विषय पर मदद नहीं कर सकती। कृपया अपने बैंक मित्र से बात करें।"
+            else:
+                response_text = "I am sorry, I cannot help with that topic. Please speak with your local Bank Mitra."
+
+    # Script safety: ensure Hindi response has Devanagari, else replace
+    if language == "hi":
+        has_devanagari = any(0x0900 <= ord(c) <= 0x097F for c in response_text)
+        if not has_devanagari and response_text:
+            logger.warning("LLM produced non-Hindi response for Hindi session: '%s'", response_text[:80])
+            response_text = "नमस्ते, मुझे आपकी बात साफ समझ नहीं आई। कृपया दोबारा कहें।"
 
     return {
         "response_text": response_text,

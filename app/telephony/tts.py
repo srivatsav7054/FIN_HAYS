@@ -27,6 +27,7 @@ VOICE_MAP: dict[str, str] = {
     "mr": "mr-IN-AarohiNeural",       # Marathi female voice
     "ta": "ta-IN-PallaviNeural",      # Tamil female voice
     "kn": "kn-IN-SapnaNeural",        # Kannada female voice
+    "ml": "ml-IN-SobhanaNeural",      # Malayalam female voice
     "bn": "bn-IN-TanishaaNeural",     # Bengali female voice
     "gu": "gu-IN-DhwaniNeural",       # Gujarati female voice
 }
